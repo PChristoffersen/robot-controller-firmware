@@ -31,7 +31,7 @@ static Buttons          g_buttons;
 static AnoDial          g_ano_dial;
 static ExternalIO       g_external_io;
 static AnalogInput      g_analog_input;
-static Feature::Engine  g_feature_engine;
+static Feature::Engine  g_feature_engine { g_leds, g_neopixels };
 
 
 static void banner()
@@ -48,7 +48,7 @@ void setup()
 {
     afio_cfg_debug_ports(AFIO_DEBUG_SW_ONLY);
     afio_remap(AFIO_REMAP_TIM2_FULL);       // TIMER2 -> PA15
-    afio_remap(AFIO_REMAP_TIM3_PARTIAL);    // TIMER3 -> PB4, PB5
+    //afio_remap(AFIO_REMAP_TIM3_PARTIAL);    // TIMER3 -> PB4, PB5
     afio_remap(AFIO_REMAP_I2C1);            // I2C1 -> PB8, PB9
     dma_init(DMA1);
 
@@ -58,6 +58,7 @@ void setup()
     //Debug.begin(115200);
     Debug.begin(921600);
     banner();
+
 
     Debug.println("Led init");
     g_leds.begin();
@@ -105,6 +106,25 @@ static void update_neopixel()
     static unsigned long last = 0;
     auto now = millis();
 
+    static uint16 brightness = 0x10*20;
+    static bool dir = true;
+    static uint32 last_b = 0;
+    if ((now-last_b)>5) {
+        g_leds.set(Leds::LED_1, brightness);
+        g_leds.set(Leds::LED_2, brightness);
+        g_leds.set(Leds::LED_3, brightness);
+        g_leds.set(Leds::LED_4, brightness);
+        //Serial1.println(brightness);
+        if (dir)
+            brightness+=0x200;
+        else
+            brightness-=0x200;
+        if (brightness>0xFFFF-0x200 || brightness < 0x200)
+            dir = !dir;
+        last_b = now;
+    }
+
+
     static uint8 state = 0;
     if ((now-last)>1000) {
         g_neopixels.set((0+state)%g_neopixels.count(), 0x04, 0x00, 0x00);
@@ -116,12 +136,6 @@ static void update_neopixel()
         g_neopixels.show();
         last = now;
     }
-}
-
-
-static void update_leds()
-{
-    g_leds.update();
 }
 
 
@@ -228,7 +242,11 @@ static void update_ano()
 
     bool select = g_ano_dial.get_switch(AnoDial::SW_CENTER);
     if (select != last_select) {
-        g_hid_device.set_buttons(1<<7, 0x0080);
+        #if 0
+        Debug.print("Select: ");
+        Debug.println(select?"1":"_");
+        #endif
+        g_hid_device.set_buttons(select?(1<<7):0, 0x0080);
         last_select = select;
     }
 
@@ -267,11 +285,13 @@ static void update_ano()
             break;
     }
     if (hat!=last_hat) {
+        #if 0
         DebugPrint("Hat: ");
         DebugPrint(st, BIN);
         DebugPrintLn("  ");
         DebugPrint((int)hat);
         DebugPrintLn();
+        #endif
         g_hid_device.set_hat(hat);
         last_hat = hat;
     }
@@ -284,8 +304,8 @@ static void update_buttons()
 
     uint8 state = 0x00;
     for (size_t sw=0; sw<g_buttons.count(); sw++) {
-        bool state = g_buttons.get(static_cast<Buttons::Switch>(sw));
-        if (state) {
+        bool pressed = g_buttons.get(static_cast<Buttons::Switch>(sw));
+        if (pressed) {
             state |= 1<<sw;
         }
     }
@@ -449,7 +469,6 @@ void loop()
 
     update_misc();
 
-    update_leds();
     update_neopixel();
     //update_debug_buttons();
     update_ano();
@@ -458,7 +477,6 @@ void loop()
     update_usb(changed);
     update_usb_features();
     update_features();
-    //g_analog_axis.tick();
 
     update_builtin_led();
     watchdog_tick();

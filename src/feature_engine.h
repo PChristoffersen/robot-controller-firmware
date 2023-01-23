@@ -2,12 +2,14 @@
 
 #include <Arduino.h>
 #include "feature_types.h"
+#include "leds.h"
+#include "neopixels.h"
 
 namespace Feature {
 
     class Engine {
         public:
-            Engine();
+            Engine(Leds &leds, Neopixels &neopixels);
 
             void begin();
 
@@ -36,10 +38,22 @@ namespace Feature {
             void dirty_brightness_lut() { m_brightness_lut_dirty = true; }
 
         private:
+            static constexpr uint32 UPDATE_INTERVAL { 20 };
+
+            struct OutputState {
+                uint32 start_time;
+                uint8 enabled_cfg;
+            };
+            OutputState m_outputs[OUTPUT_COUNT];
+
             uint32 m_inputs;
+
+            Leds &m_leds;
+            Neopixels &m_neopixels;
 
             State m_state;
             bool m_state_dirty;
+            uint32 m_last_update;
 
             OutputConfigs m_output_configs;
             bool m_output_configs_dirty;
@@ -54,6 +68,8 @@ namespace Feature {
             bool m_brightness_lut_dirty;
 
             void set_inputs(uint32 values, uint32 mask);
+
+            void calculate_output();
     };
 
 }

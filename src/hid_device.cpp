@@ -178,8 +178,6 @@ static volatile uint8 g_feature_buffer_data[FEATURE_BUFFER_OFFSET[HIDDevice::FEA
 
 
 
-
-
 const uint8 *HIDDevice::descriptor()
 {
     return report_descriptor;
@@ -201,6 +199,7 @@ HIDDevice::HIDDevice(USBHID& HID) :
         { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[1]], FEATURE_SIZE[1], FEATURE_REPORT_ID(static_cast<FeatureId>(1)), HID_BUFFER_MODE_NO_WAIT },
         { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[2]], FEATURE_SIZE[2], FEATURE_REPORT_ID(static_cast<FeatureId>(2)), HID_BUFFER_MODE_NO_WAIT },
         { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[3]], FEATURE_SIZE[3], FEATURE_REPORT_ID(static_cast<FeatureId>(3)), HID_BUFFER_MODE_NO_WAIT },
+        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[4]], FEATURE_SIZE[4], FEATURE_REPORT_ID(static_cast<FeatureId>(4)), HID_BUFFER_MODE_NO_WAIT },
     }
 {
     m_report.reportID = REPORT_ID;
@@ -218,25 +217,7 @@ void HIDDevice::begin(void)
 {
     memset((void*)g_feature_buffer_data, 0x00, sizeof(g_feature_buffer_data));
     m_output_buffer.buffer[0] = REPORT_ID;
-    Debug.print("Feature: ");
-    Debug.print(sizeof(g_feature_buffer_data));
-    Debug.print(" ");
-    Debug.print((uint32)&g_feature_buffer_data[0]);
-    Debug.print(" ");
-    Debug.print((uint32)&g_feature_buffer_data);
-    Debug.println();
     for (size_t i=0; i<FEATURE_COUNT; i++) {
-        Debug.print(i);
-        Debug.print(": ");
-        Debug.print((uint32)(m_feature_buffers[i].buffer), HEX);
-        Debug.print(" ");
-        Debug.print(FEATURE_SIZE[i], HEX);
-        Debug.print(" ");
-        Debug.print(FEATURE_BUFFER_SIZES[i], HEX);
-        Debug.print(" ");
-        Debug.print(FEATURE_BUFFER_OFFSET[i], HEX);
-        Debug.println();
-
         m_feature_buffers[i].buffer[0] = FEATURE_REPORT_ID(static_cast<FeatureId>(i));
     }
 

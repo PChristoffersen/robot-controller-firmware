@@ -6,11 +6,11 @@
 class AnoDial {
     public:
         enum Switch {
+            SW_CENTER,
             SW_LEFT,
             SW_UP,
             SW_RIGHT,
             SW_DOWN,
-            SW_CENTER,
             N_SWITCHES,
         };
 

@@ -49,6 +49,12 @@ static constexpr uint32 HEAD_COUNT { 1 };
 static constexpr uint32 TAIL_COUNT { 1 };
 
 
+/// typical values for SMD5050 LEDs
+static constexpr uint16 COLOR_CORRECTION_R { 0xFF };
+static constexpr uint16 COLOR_CORRECTION_G { 0xB0 };
+static constexpr uint16 COLOR_CORRECTION_B { 0xF0 };
+
+
 /* -------------------------------------
  * Strip spec
 */
@@ -80,9 +86,15 @@ Neopixels::Neopixels()
 
 void Neopixels::set(size_t pos, uint8 r, uint8 g, uint8 b)
 {
-    m_pixel_buffer[pos*BYTES_PER_PIXEL] = g;
+    #if 0
+    m_pixel_buffer[pos*BYTES_PER_PIXEL]   = (COLOR_CORRECTION_G * g)/0xFF;
+    m_pixel_buffer[pos*BYTES_PER_PIXEL+1] = (COLOR_CORRECTION_R * r)/0xFF;
+    m_pixel_buffer[pos*BYTES_PER_PIXEL+2] = (COLOR_CORRECTION_B * b)/0xFF;
+    #else
+    m_pixel_buffer[pos*BYTES_PER_PIXEL]   = g;
     m_pixel_buffer[pos*BYTES_PER_PIXEL+1] = r;
     m_pixel_buffer[pos*BYTES_PER_PIXEL+2] = b;
+    #endif
 }
 
 

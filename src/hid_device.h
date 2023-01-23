@@ -97,7 +97,7 @@ class HIDDevice : public HIDReporter {
         }
         void set_buttons(button_value buttons, button_value mask)
         { 
-            button_value value = m_report.buttons & (~mask | buttons);
+            button_value value = (m_report.buttons & ~mask) | buttons;
             m_report_pending = (value!=m_report.buttons);
             m_report.buttons = value;
         }

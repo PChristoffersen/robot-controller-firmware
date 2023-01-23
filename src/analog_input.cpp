@@ -27,7 +27,8 @@ static constexpr uint8_t ANALOG_INPUT_PINS[AnalogInput::AXIS_COUNT] = {
     AXIS_RIGHT_Y_PIN,
     AXIS_RIGHT_Z_PIN,
 };
-static constexpr size_t ANALOG_INPUT_PIN_COUNT { sizeof(ANALOG_INPUT_PIN_COUNT)/sizeof(ANALOG_INPUT_PINS[0]) };
+static constexpr size_t ANALOG_INPUT_PIN_COUNT { sizeof(ANALOG_INPUT_PINS)/sizeof(ANALOG_INPUT_PINS[0]) };
+static_assert(ANALOG_INPUT_PIN_COUNT==AnalogInput::AXIS_COUNT);
 
 
 static adc_dev              *g_adc            { ADC1 };
@@ -44,10 +45,11 @@ static dma_tube_config  g_dma_config;
     In toggle mode the ADC only triggers on every other timer interrupt.
     therefore the tick ratio numerator is 2
 */
-static constexpr uint16 ANALOG_INPUT_TIMER_PRESCALE { 32 };
+static constexpr uint16 ANALOG_INPUT_TIMER_PRESCALE { 72/8 };
 using AxisTimerTicks = chrono::duration<uint32_t , std::ratio<2, F_CPU/ANALOG_INPUT_TIMER_PRESCALE>>;
 
-static constexpr AxisTimerTicks ANALOG_INPUT_TIMER_INTERVAL { 50ms };
+static constexpr AxisTimerTicks ANALOG_INPUT_TIMER_INTERVAL { 5ms };
+static constexpr uint16 ANALOG_INPUT_TIMER_INTERVAL_COUNT { ANALOG_INPUT_TIMER_INTERVAL.count() };
 static_assert(ANALOG_INPUT_TIMER_INTERVAL.count()<0xFFFF);
 
 /* -------------------------------------
@@ -124,8 +126,17 @@ static AnalogInput::axis_value g_dma_data[AnalogInput::AXIS_COUNT];
 
 inline void AnalogInput::_isr()
 {
-    memcpy(m_adc_data, g_dma_data, sizeof(m_adc_data));
-    m_adc_date_cnt++;
+    for (size_t i=0; i<AXIS_COUNT; i++) {
+        auto &data = m_adc_data[i][m_adc_data_next];
+        m_adc_data_total[i] -= data;
+        data = g_dma_data[i];
+        m_adc_data_total[i] += data;
+    }
+    m_adc_data_next++;
+    if (m_adc_data_next>=ADC_DATA_AVG_COUNT) {
+        m_adc_data_next = 0;
+    }
+    m_adc_data_cnt++;
 }
 
 
@@ -154,8 +165,15 @@ static void analog_input_timer_isr()
 #endif
 
 
-AnalogInput::AnalogInput()
+AnalogInput::AnalogInput() :
+    m_adc_data_next { 0 }
 {
+    for (size_t i=0; i<AXIS_COUNT; i++) {
+        for (size_t j=0; j<ADC_DATA_AVG_COUNT; j++) {
+            m_adc_data[i][j] = AXIS_CENTER;
+        }
+        m_adc_data_total[i] = ADC_DATA_AVG_COUNT*AXIS_CENTER;
+    }
 }
 
 
@@ -169,11 +187,10 @@ void AnalogInput::begin()
     for (size_t i=0; i<ANALOG_INPUT_PIN_COUNT; i++) {
         auto pin = ANALOG_INPUT_PINS[i];
         gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_INPUT_ANALOG);
-        m_adc_data[i] = AXIS_CENTER;
     }
 
     adc_calibrate(g_adc);
-    adc_set_sample_rate(g_adc, ADC_SMPR_239_5);
+    adc_set_sample_rate(g_adc, ADC_SMPR_55_5);
     adc_set_pins(g_adc, ANALOG_INPUT_PINS, ANALOG_INPUT_PIN_COUNT);
     adc_set_scan_mode(g_adc);
     adc_set_extsel(g_adc, ADC_EXT_EV_TIM1_CC1);
@@ -210,43 +227,11 @@ void AnalogInput::begin()
 AnalogInput::axis_value AnalogInput::get(size_t idx) const
 {
     noInterrupts();
-    auto data = m_adc_data[idx];
+    auto data = m_adc_data_total[idx];
     interrupts();
-    int32 val = static_cast<int32>(data)-AXIS_CENTER;
+    int32 val = static_cast<int32>(data/ADC_DATA_AVG_COUNT)-AXIS_CENTER;
     val = std::abs(val) < AXIS_DEADZONE ? 0 : val;
-    return clamp_value<int32>(AXIS_SCALE*val, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max());
+    return clamp_value<int32>(val*std::numeric_limits<int16>::max()/AXIS_MAX, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max());
 }
 
 
-void AnalogInput::tick()
-{
-    static uint32 last_cnt = 0;
-
-    uint32 cnt = data_count();
-
-    if (cnt!=last_cnt) {
-        DebugPrint(millis());
-        DebugPrint(" ");
-        DebugPrint(m_adc_date_cnt);
-        DebugPrint(" ");
-        for (size_t i=0; i<AXIS_COUNT; i++) {
-            DebugPrint(m_adc_data[i]);
-            DebugPrint("  ");
-        }
-        DebugPrintLn();
- 
-        last_cnt = cnt;
-    }
-
-    #if 0
-    static uint32 last = 2000;
-    uint32 now = millis();
-    if ((now-last) > 1000) {
-        DebugPrint(micros());
-        DebugPrintLn(" Trigger");
-        adc_start_conversion(g_adc);
-
-        last = now;
-    }
-    #endif
-}

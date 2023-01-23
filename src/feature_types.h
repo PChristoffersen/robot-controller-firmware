@@ -83,6 +83,7 @@ namespace Feature {
         EXT_OUT2,
         _COUNT
     };
+    static constexpr size_t OUTPUT_COUNT           { static_cast<size_t>(Output::_COUNT) };
     static constexpr uint8 OUTPUT_LED_FIRST        { static_cast<uint8>(Output::LED1) };
     static constexpr uint8 OUTPUT_LED_LAST         { static_cast<uint8>(Output::LED4) };
     static constexpr uint8 OUTPUT_LED_COUNT        { OUTPUT_LED_LAST-OUTPUT_LED_FIRST+1 };
@@ -145,7 +146,7 @@ namespace Feature {
     using ColorLUT = ColorLUTEntry[COLOR_LUT_ENTRY_COUNT];
     static constexpr size_t COLOR_LUT_SIZE { sizeof(ColorLUT) };
 
-    using BrightnessLUTEntry = uint32;
+    using BrightnessLUTEntry = uint16;
     static constexpr size_t BRIGHTNESS_LUT_ENTRY_SIZE { sizeof(BrightnessLUTEntry) };
     static constexpr size_t BRIGHTNESS_LUT_ENTRY_COUNT { LUT_COUNT };
     using BrightnessLUT = BrightnessLUTEntry[BRIGHTNESS_LUT_ENTRY_COUNT];

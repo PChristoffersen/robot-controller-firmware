@@ -2,6 +2,7 @@
 
 #include <Wire.h>
 #include <config.h>
+#include "debug.h"
 
 /* -------------------------------------
  * Hardware
@@ -55,9 +56,11 @@ bool Buttons::get(Switch sw)
     if (digitalRead(PCF8574_INT_PIN)==LOW) {
         m_data = read();
         #if 0
-        DebugPrint("i2c Read ");
-        DebugPrint(digitalRead(PCF8574_INT_PIN));
-        DebugPrintLn();
+        Debug.print("i2c Read ");
+        Debug.print(digitalRead(PCF8574_INT_PIN));
+        Debug.print(" : ");
+        Debug.print(m_data, BIN);
+        Debug.println();
         #endif
     }
 

@@ -15,28 +15,28 @@ class AnalogInput {
 
         void begin();
 
-        void tick();
-
         axis_value get(size_t idx) const;
         inline uint32 data_count() const
         {
             noInterrupts();
-            auto val = m_adc_date_cnt;
+            auto val = m_adc_data_cnt;
             interrupts();
             return val;
         }
-        raw_value   get_raw(size_t idx) const { return m_adc_data[idx]; }
+        raw_value   get_raw(size_t idx) const { return m_adc_data_total[idx]/ADC_DATA_AVG_COUNT; }
 
         constexpr size_t count() const { return AXIS_COUNT; }
 
 
         inline void _isr();
     private:
-        static constexpr uint32_t ADC_TIMER_INTERVAL_US { 1000000u };
-        static constexpr axis_value AXIS_DEADZONE { 30u };
+        static constexpr size_t ADC_DATA_AVG_COUNT { 4 };
+        static constexpr axis_value AXIS_DEADZONE { 16u };
         static constexpr axis_value AXIS_CENTER { 2048 };
-        static constexpr int32 AXIS_SCALE { 16 };
+        static constexpr axis_value AXIS_MAX { 2040 };
 
-        uint32 m_adc_date_cnt; 
-        uint16 m_adc_data[AXIS_COUNT];
+        uint32 m_adc_data_cnt; 
+        uint16 m_adc_data[AXIS_COUNT][ADC_DATA_AVG_COUNT];
+        uint32 m_adc_data_next;
+        volatile uint32 m_adc_data_total[AXIS_COUNT];
 };
