@@ -99,17 +99,16 @@ def _HIDIOCGFEATURE(fd, report_id, rsize):
     # rsize has the report length in it
     buf = bytearray([report_id & 0xff]) + bytearray(rsize - 1)
     fcntl.ioctl(fd, _IOC_HIDIOCGFEATURE(None, len(buf)), buf)
-    return list(buf)  # Note: first byte is report ID
+    return buf  # Note: first byte is report ID
 
 #define HIDIOCGFEATURE(len)    _IOC(_IOC_WRITE|_IOC_READ, 'H', 0x07, len)
 def _IOC_HIDIOCSFEATURE(none, len):
     return _IOC(_IOC_WRITE | _IOC_READ, 'H', 0x06, len)
 
 
-def _HIDIOCSFEATURE(fd, data):
+def _HIDIOCSFEATURE(fd, data: bytearray):
     """ set feature report """
-    buf = bytearray(data)
-    sz = fcntl.ioctl(fd, _IOC_HIDIOCSFEATURE(None, len(buf)), buf)
+    sz = fcntl.ioctl(fd, _IOC_HIDIOCSFEATURE(None, len(data)), data)
     return sz
 
 #define HIDIOCGRAWUNIQ(len)     _IOC(_IOC_READ, 'H', 0x08, len)
@@ -159,7 +158,7 @@ class ReportDescriptor:
         for hid,value in _iter_descriptor(memoryview(desc)):
             #print(f"{hid:02x} {value:04x}")
             if hid==0x84: # ReportID
-                print(f"ReportID: {value}")
+                #print(f"ReportID: {value}")
                 report_id = value
             elif hid==0x74: # Report Size
                 report_size = value
@@ -174,6 +173,7 @@ class ReportDescriptor:
             elif hid==0xb0: # Feature
                 data = self.feature_reports[report_id] = self.feature_reports.get(report_id, ReportData(report_id, hid))
                 data.bits += report_size*report_count
+                #print(f"FeatureReport: {report_id} {data.bits}")
 
 
 
@@ -208,18 +208,23 @@ class Device:
         return self._product_id
 
 
-    def get_feature_report(self, report_ID: int):
+    def get_feature_report(self, report_ID: int) -> bytearray:
         report = self.report_descriptor.feature_reports[report_ID]
         fd = self.device.fileno()
-        return _HIDIOCGFEATURE(fd, report_ID, report.size)
+        buf = _HIDIOCGFEATURE(fd, report_ID, report.size)
+        return memoryview(buf)[1:]
 
-    def set_feature_report(self, report_id: int, data):
-        self.report_descriptor.feature_reports[report_id]
-        assert data[0] == report_id
+    def set_feature_report(self, report_id: int, data: bytearray):
+        report = self.report_descriptor.feature_reports[report_id]
+        assert(report.size==len(data)+1)
+        buf = bytearray(struct.pack("<B", report_id)+data)
+        assert(report.size==len(buf))
+        assert buf[0] == report_id
         fd = self.device.fileno()
-        sz = _HIDIOCSFEATURE(fd, data)
-        if sz != len(data):
-            raise OSError('Failed to write data: {data} - bytes written: {sz}')
+        sz = _HIDIOCSFEATURE(fd, buf)
+        print(f"> {buf}")
+        if sz != len(buf):
+            raise OSError(f"Failed to write data: {data} - bytes written: {sz}")
 
     def __enter__(self):
         return self

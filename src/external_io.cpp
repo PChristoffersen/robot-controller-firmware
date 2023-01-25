@@ -25,7 +25,6 @@ void ExternalIO::begin()
     for (size_t i=0; i<input_count(); i++) {
         pinMode(INPUT_PINS[i], INPUT_PULLDOWN);
     }
-
     for (size_t i=0; i<output_count(); i++) {
         pinMode(OUTPUT_PINS[i], OUTPUT);
         digitalWrite(OUTPUT_PINS[i], LOW);

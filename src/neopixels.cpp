@@ -78,7 +78,8 @@ static void ws2812_dma_isr()
 
 
 
-Neopixels::Neopixels()
+Neopixels::Neopixels() :
+    m_dirty { false }
 {
 
 }
@@ -91,9 +92,11 @@ void Neopixels::set(size_t pos, uint8 r, uint8 g, uint8 b)
     m_pixel_buffer[pos*BYTES_PER_PIXEL+1] = (COLOR_CORRECTION_R * r)/0xFF;
     m_pixel_buffer[pos*BYTES_PER_PIXEL+2] = (COLOR_CORRECTION_B * b)/0xFF;
     #else
-    m_pixel_buffer[pos*BYTES_PER_PIXEL]   = g;
-    m_pixel_buffer[pos*BYTES_PER_PIXEL+1] = r;
-    m_pixel_buffer[pos*BYTES_PER_PIXEL+2] = b;
+    size_t idx = pos*BYTES_PER_PIXEL;
+    m_dirty |= (m_pixel_buffer[idx]!=g) || (m_pixel_buffer[idx+1]!=r) || m_pixel_buffer[idx+2]!=b;
+    m_pixel_buffer[idx]   = g;
+    m_pixel_buffer[idx+1] = r;
+    m_pixel_buffer[idx+2] = b;
     #endif
 }
 
@@ -180,6 +183,7 @@ void Neopixels::show()
     dma_set_num_transfers(ws2812_dma, WS2812_DMA_CH, DMA_BUFFER_SIZE);
     dma_running = true;
     dma_enable(ws2812_dma, WS2812_DMA_CH);
+    m_dirty = false;
 }
 
 

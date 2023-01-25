@@ -40,7 +40,7 @@
 #define HID_DESC_OUTPUT(VAL) 0x91, VAL
 #define HID_DESC_FEATURE(VAL) 0xb1, VAL
 
-#define HID_DESC_FEATURE_REPORT_ID(VAL) HID_DESC_REPORT_ID((HIDDevice::REPORT_ID))
+#define HID_DESC_FEATURE_REPORT_ID(VAL) HID_DESC_REPORT_ID(HIDDevice::FEATURE_REPORT_ID(VAL))
 #define HID_DESC_FEATURE_USAGE(VAL) HID_DESC_USAGE(0x01+static_cast<uint8>(VAL))
 
 
@@ -111,35 +111,35 @@ static constexpr uint8 report_descriptor[] {
 
         HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
             HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_DEFAULT),             //      Usage (Vendor Usage X)
-            HID_DESC_REPORT_SIZE(Feature::STATE_SIZE), 	                    //      Report size (8)
+            HID_DESC_REPORT_SIZE(8*Feature::STATE_SIZE), 	                    //      Report size (8)
             HID_DESC_REPORT_COUNT(1), 	                                    //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
         HID_DESC_FEATURE_REPORT_ID(HIDDevice::FEATURE_OUTPUT_CONFIGS),
         HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
             HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_OUTPUT_CONFIGS),      //      Usage (Vendor Usage X)
-            HID_DESC_REPORT_SIZE(Feature::OUTPUT_CONFIG_SIZE),              //      Report size (*)
+            HID_DESC_REPORT_SIZE(8*Feature::OUTPUT_CONFIG_SIZE),            //      Report size (*)
             HID_DESC_REPORT_COUNT(Feature::OUTPUT_CONFIG_COUNT),            //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
         HID_DESC_FEATURE_REPORT_ID(HIDDevice::FEATURE_MODE_CONFIGS),
         HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
             HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_MODE_CONFIGS),        //      Usage (Vendor Usage X)
-            HID_DESC_REPORT_SIZE(Feature::MODE_CONFIG_SIZE),                //      Report size (*)
+            HID_DESC_REPORT_SIZE(8*Feature::MODE_CONFIG_SIZE),              //      Report size (*)
             HID_DESC_REPORT_COUNT(Feature::MODE_CONFIG_COUNT),              //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
         HID_DESC_FEATURE_REPORT_ID(HIDDevice::FEATURE_COLOR_LUT),
         HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
-            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_COLOR_LUT),        //      Usage (Vendor Usage X)
-            HID_DESC_REPORT_SIZE(Feature::COLOR_LUT_ENTRY_SIZE),            //      Report size (*)
+            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_COLOR_LUT),           //      Usage (Vendor Usage X)
+            HID_DESC_REPORT_SIZE(8*Feature::COLOR_LUT_ENTRY_SIZE),          //      Report size (*)
             HID_DESC_REPORT_COUNT(Feature::COLOR_LUT_ENTRY_COUNT),          //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
         HID_DESC_FEATURE_REPORT_ID(HIDDevice::FEATURE_BRIGHTNESS_LUT),
         HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
-            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_BRIGHTNESS_LUT),   //      Usage (Vendor Usage X)
-            HID_DESC_REPORT_SIZE(Feature::BRIGHTNESS_LUT_ENTRY_SIZE),       //      Report size (*)
+            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_BRIGHTNESS_LUT),      //      Usage (Vendor Usage X)
+            HID_DESC_REPORT_SIZE(8*Feature::BRIGHTNESS_LUT_ENTRY_SIZE),     //      Report size (*)
             HID_DESC_REPORT_COUNT(Feature::BRIGHTNESS_LUT_ENTRY_COUNT),     //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
@@ -156,6 +156,13 @@ static constexpr size_t FEATURE_SIZE[HIDDevice::FEATURE_COUNT] {
     Feature::MODE_CONFIGS_SIZE,
     Feature::COLOR_LUT_SIZE,
     Feature::BRIGHTNESS_LUT_SIZE
+};
+static constexpr size_t FEATURE_SIZES[HIDDevice::FEATURE_COUNT] {
+    HID_BUFFER_SIZE(FEATURE_SIZE[0], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(0))),
+    HID_BUFFER_SIZE(FEATURE_SIZE[1], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(1))),
+    HID_BUFFER_SIZE(FEATURE_SIZE[2], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(2))),
+    HID_BUFFER_SIZE(FEATURE_SIZE[3], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(3))),
+    HID_BUFFER_SIZE(FEATURE_SIZE[4], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(4))),
 };
 static constexpr size_t FEATURE_BUFFER_SIZES[HIDDevice::FEATURE_COUNT] {
     HID_BUFFER_ALLOCATE_SIZE(FEATURE_SIZE[0], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(0))),
@@ -195,11 +202,11 @@ HIDDevice::HIDDevice(USBHID& HID) :
     m_report_pending { false },
     m_output_buffer(g_feature_buffer_data, HID_BUFFER_SIZE(OUTPUT_BUFFER_SIZE, REPORT_ID), REPORT_ID, HID_BUFFER_MODE_NO_WAIT),
     m_feature_buffers {
-        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[0]], FEATURE_SIZE[0], FEATURE_REPORT_ID(static_cast<FeatureId>(0)), HID_BUFFER_MODE_NO_WAIT },
-        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[1]], FEATURE_SIZE[1], FEATURE_REPORT_ID(static_cast<FeatureId>(1)), HID_BUFFER_MODE_NO_WAIT },
-        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[2]], FEATURE_SIZE[2], FEATURE_REPORT_ID(static_cast<FeatureId>(2)), HID_BUFFER_MODE_NO_WAIT },
-        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[3]], FEATURE_SIZE[3], FEATURE_REPORT_ID(static_cast<FeatureId>(3)), HID_BUFFER_MODE_NO_WAIT },
-        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[4]], FEATURE_SIZE[4], FEATURE_REPORT_ID(static_cast<FeatureId>(4)), HID_BUFFER_MODE_NO_WAIT },
+        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[0]], FEATURE_SIZES[0], FEATURE_REPORT_ID(static_cast<FeatureId>(0)), HID_BUFFER_MODE_NO_WAIT },
+        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[1]], FEATURE_SIZES[1], FEATURE_REPORT_ID(static_cast<FeatureId>(1)), HID_BUFFER_MODE_NO_WAIT },
+        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[2]], FEATURE_SIZES[2], FEATURE_REPORT_ID(static_cast<FeatureId>(2)), HID_BUFFER_MODE_NO_WAIT },
+        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[3]], FEATURE_SIZES[3], FEATURE_REPORT_ID(static_cast<FeatureId>(3)), HID_BUFFER_MODE_NO_WAIT },
+        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[4]], FEATURE_SIZES[4], FEATURE_REPORT_ID(static_cast<FeatureId>(4)), HID_BUFFER_MODE_NO_WAIT },
     }
 {
     m_report.reportID = REPORT_ID;

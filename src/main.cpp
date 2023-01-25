@@ -1,5 +1,7 @@
 #include <Arduino.h>
+#undef abs
 #include <libmaple/dma.h>
+#include <algorithm>
 
 #include <USBComposite.h>
 #include <UniqueID.h>
@@ -31,7 +33,12 @@ static Buttons          g_buttons;
 static AnoDial          g_ano_dial;
 static ExternalIO       g_external_io;
 static AnalogInput      g_analog_input;
-static Feature::Engine  g_feature_engine { g_leds, g_neopixels };
+static Feature::Engine  g_feature_engine { g_leds, g_neopixels, g_external_io };
+
+
+static constexpr uint8 ANO_BUTTON_START { 0 };
+static constexpr uint8 BUTTON_START { 1 };
+
 
 
 static void banner()
@@ -68,8 +75,8 @@ void setup()
     g_ano_dial.begin();
     Debug.println("Button init");
     g_buttons.begin();
-    //Debug.println("External IO init");
-    //g_external_io.begin();
+    Debug.println("External IO init");
+    g_external_io.begin();
     Debug.println("Analog input init");
     g_analog_input.begin();
     Debug.println("Feature engine init");
@@ -103,9 +110,11 @@ void setup()
 
 static void update_neopixel()
 {
+    static constexpr uint32 MIN_SHOW_INTERVAL { 20 };
     static unsigned long last = 0;
     auto now = millis();
 
+    #if 0
     static uint16 brightness = 0x10*20;
     static bool dir = true;
     static uint32 last_b = 0;
@@ -123,90 +132,30 @@ static void update_neopixel()
             dir = !dir;
         last_b = now;
     }
+    #endif
 
-
+    #if 0
     static uint8 state = 0;
-    if ((now-last)>1000) {
+    static unsigned long last_ = 0;
+    if ((now-last_)>1000) {
         g_neopixels.set((0+state)%g_neopixels.count(), 0x04, 0x00, 0x00);
         g_neopixels.set((1+state)%g_neopixels.count(), 0x00, 0x04, 0x00);
         g_neopixels.set((2+state)%g_neopixels.count(), 0x04, 0x00, 0x04);
         g_neopixels.set((3+state)%g_neopixels.count(), 0x04, 0x04, 0x00);
         state++;
+        last_ = now;
+    }
+    #endif
 
+    if ((now-last)<MIN_SHOW_INTERVAL)
+        return;
+
+    if (g_neopixels.is_dirty()) {
         g_neopixels.show();
         last = now;
     }
 }
 
-
-struct InputState {
-    bool sw[Buttons::count()];
-
-    bool            ano_sw[AnoDial::switch_count()];
-    int             ano_pos;
-    int             ano_diff;
-
-    void print()
-    {
-        DebugPrint("Input: ");
-        for (size_t i=0; i<Buttons::count(); i++) {
-            DebugPrint(" ");
-            DebugPrint(sw[i]?"1":"_");
-        }
-        for (size_t i=0; i<AnoDial::switch_count(); i++) {
-            DebugPrint(" ");
-            DebugPrint(ano_sw[i]?"1":"_");
-        }
-        DebugPrint("  ");
-        DebugPrint(ano_pos);
-        DebugPrint("  ");
-        DebugPrint(ano_diff);
-        DebugPrintLn();
-    }
-};
-
-
-static void update_debug_buttons()
-{
-    static unsigned long last = 0;
-    auto now = millis();
-
-    static InputState last_state;
-
-    if ((now-last)>20) {
-        bool changed = false;
-
-        for (size_t i=0; i<g_buttons.count(); i++) {
-            bool state = g_buttons.get(static_cast<Buttons::Switch>(i));
-            if (state!=last_state.sw[i]) {
-                changed = true;
-                last_state.sw[i] = state;
-            }
-        }
-        #if 1
-        for (size_t i=0; i<g_ano_dial.switch_count(); i++) {
-            bool state = g_ano_dial.get_switch(static_cast<AnoDial::Switch>(i));
-            if (state!=last_state.ano_sw[i]) {
-                changed = true;
-                last_state.ano_sw[i] = state;
-            }
-        }
-        auto ano = g_ano_dial.get_pos();
-        if (ano!=last_state.ano_pos) {
-            changed = true;
-            last_state.ano_diff = ano-last_state.ano_pos;
-            last_state.ano_pos = ano;
-        }
-        #endif
-        
-        if (changed) {
-            last_state.print();
-            last_state.ano_diff = 0;
-        }
-
-        last = now;
-    }
-}
 
 
 static void update_misc()
@@ -242,11 +191,12 @@ static void update_ano()
 
     bool select = g_ano_dial.get_switch(AnoDial::SW_CENTER);
     if (select != last_select) {
+        constexpr uint16 mask { 1<<ANO_BUTTON_START };
         #if 0
         Debug.print("Select: ");
         Debug.println(select?"1":"_");
         #endif
-        g_hid_device.set_buttons(select?(1<<7):0, 0x0080);
+        g_hid_device.set_buttons(select?mask:0, mask);
         last_select = select;
     }
 
@@ -300,9 +250,17 @@ static void update_ano()
 
 static void update_buttons()
 {
-    static uint8 last_state;
+    static constexpr uint32 MIN_UPDATE_INTERVAL { 10 };
+    constexpr uint16 MASK { 0b11111111<<BUTTON_START };
+    static uint32 last = 0;
+    static uint16 last_state;
+    uint32 now = millis();    
 
-    uint8 state = 0x00;
+    if ((now-last)<MIN_UPDATE_INTERVAL) 
+        return;
+    last = now;
+
+    uint16 state = 0x00;
     for (size_t sw=0; sw<g_buttons.count(); sw++) {
         bool pressed = g_buttons.get(static_cast<Buttons::Switch>(sw));
         if (pressed) {
@@ -311,14 +269,84 @@ static void update_buttons()
     }
     if (state!=last_state) {
         g_feature_engine.set_buttons(state);
-        g_hid_device.set_buttons(static_cast<HIDDevice::button_value>(state)<<8, 0xFF00);
+        g_hid_device.set_buttons(state<<BUTTON_START, MASK);
         last_state = state;
     }
 }
 
 
-static bool update_analog_input()
+static void update_external()
 {
+    static constexpr uint32 MIN_UPDATE_INTERVAL { 10 };
+    static uint32 last = 0;
+    static bool in1_state = false;
+    static bool in2_state = false;
+    uint32 now = millis();    
+
+
+    if ((now-last)<MIN_UPDATE_INTERVAL) 
+        return;
+    last = now;
+
+    auto in1 = g_external_io.get(ExternalIO::IN_1);
+    auto in2 = g_external_io.get(ExternalIO::IN_2);
+
+    #if 0
+    static bool state = false;
+    g_external_io.put(ExternalIO::OUT_1, state);
+    g_external_io.put(ExternalIO::OUT_2, !state);
+    state = !state;
+    #endif
+
+    #if 0
+    static uint32 last2 = 0;
+    static uint8 state = 0;
+    if ((now-last2)>1) {
+        switch (state) {
+            case 0:
+                g_external_io.put(ExternalIO::OUT_1, true);
+                break;
+            case 1:
+                g_external_io.put(ExternalIO::OUT_2, true);
+                break;
+            case 2:
+                g_external_io.put(ExternalIO::OUT_1, false);
+                break;
+            case 3:
+                g_external_io.put(ExternalIO::OUT_2, false);
+                break;
+
+        }
+        last2 = now;
+        state++;
+        if (state>3) state = 0;
+
+    }
+    #endif
+
+
+    if (in1!=in1_state || in2!=in2_state) {
+        Debug.print(now);
+        Debug.print(" EXTIN: ");
+        Debug.print(in1?"1":"_");
+        Debug.print(in2?"1":"_");
+        Debug.println();
+
+        g_leds.set(Leds::LED_1, in1?0xFFFF:0x0000);
+        g_leds.set(Leds::LED_2, in2?0xFFFF:0x0000);
+
+        in1_state = in1;
+        in2_state = in2;
+    }
+
+
+}
+
+
+
+static void update_analog_input()
+{
+    static constexpr AnalogInput::axis_value AXIS_CHANGE_THRESHOLD { 8 };
     static uint32 last_count = 0;
     static AnalogInput::axis_value last_values[g_analog_input.count()];
     bool changed = false;
@@ -328,16 +356,14 @@ static bool update_analog_input()
         for (size_t i=0; i<g_analog_input.count(); i++) {
             auto val = g_analog_input.get(i);
             if (val!=last_values[i]) {
+                changed |= std::abs(last_values[i]-val)>AXIS_CHANGE_THRESHOLD;
                 g_hid_device.setAxis(static_cast<HIDDevice::axis_type>(i), val);
                 last_values[i] = val;
-                changed = true;
             }
         }
 
         last_count = count;
     }
-
-    return changed;
 }
 
 
@@ -416,22 +442,18 @@ static void print_report()
     }
 }
 
-static void update_usb(bool changed)
+static void update_usb()
 {
     static unsigned long last = 0;
-    bool send_report = false;
     auto now = millis();
-
-    send_report |= changed;
 
     if ((now-last)<MIN_HID_REPORT_INTERVAL)
         return;
 
-    if (send_report) {
+    if (g_hid_device.is_report_pending()) {
         print_report();
-        g_hid_device.sendReport();
+        g_hid_device.send_report();
         last = now;
-        send_report = false;
     }
 
 }
@@ -441,9 +463,7 @@ static void update_usb(bool changed)
 
 static void update_features()
 {
-    if (g_feature_engine.is_dirty()) {
-        g_feature_engine.update();
-    }
+    g_feature_engine.update();
 }
 
 
@@ -465,22 +485,18 @@ static void update_builtin_led()
 
 void loop() 
 {
-    bool changed = false;
-
     update_misc();
 
-    update_neopixel();
-    //update_debug_buttons();
     update_ano();
     update_buttons();
-    changed |= update_analog_input();
-    update_usb(changed);
+    update_external();
+    update_analog_input();
+    update_usb();
     update_usb_features();
     update_features();
 
+    update_neopixel();
     update_builtin_led();
     watchdog_tick();
-
-    delay(10);
 }
 

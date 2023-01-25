@@ -64,9 +64,12 @@ namespace Feature {
     static constexpr uint8  INPUT_SOFTWARE_COUNT   { INPUT_SOFTWARE_LAST-INPUT_SOFTWARE_FIRST+1 };
     static constexpr uint32 INPUT_SOFTWARE_MASK    { ((1ul<<INPUT_SOFTWARE_COUNT)-1)<<INPUT_SOFTWARE_FIRST };
 
-    typedef struct {
+    struct __packed State {
         uint8 soft_input;
-    } __packed State;
+        State() :
+            soft_input { 0x00 }
+        {}
+    };
     static constexpr size_t STATE_SIZE { sizeof(State) };
     static_assert(sizeof(State::soft_input)*8==INPUT_SOFTWARE_COUNT);
 
@@ -98,21 +101,33 @@ namespace Feature {
 
 
 
-    typedef struct {
+    struct __packed OutputConfigEntry {
         bool  enable_inv: 1;
         uint8 _pack1: 2;
         uint8 enable: 5;
 
         bool  active_inv: 1;
-        bool  fallthrough: 1;
-        uint8 _pack2: 1;
+        uint8 _pack2: 2;
         uint8 active: 5;
 
         uint8 active_mode: 4;
         uint8 passive_mode: 4;
-        uint8 active_lut: 4;
-        uint8 passive_lut: 4;
-    } __packed OutputConfigEntry;
+        uint8 primary_lut: 4;
+        uint8 secondary_lut: 4;
+        
+        OutputConfigEntry(bool _enable) : 
+            enable_inv      { !_enable },
+            enable          { INPUT_TRUE },
+            active_inv      { true },
+            active          { INPUT_TRUE },
+            active_mode     { 0 },
+            passive_mode    { 0 },
+            primary_lut     { 0 },
+            secondary_lut   { 0 }
+        {
+        }
+        OutputConfigEntry() : OutputConfigEntry(false) {}
+    };
 
     static constexpr size_t OUTPUT_CONFIG_ENTRIES_PER_OUTPUT { 4 };
     using OutputConfig = OutputConfigEntry[OUTPUT_CONFIG_ENTRIES_PER_OUTPUT];
@@ -123,12 +138,20 @@ namespace Feature {
     static_assert(OUTPUT_CONFIGS_SIZE==(OUTPUT_CONFIG_SIZE*OUTPUT_CONFIG_COUNT));
 
 
-    typedef struct {
+    struct __packed ModeConfig {
         uint16 active_time;
         uint16 passive_time;
         uint16 rise_time;
         uint16 fall_time;
-    } __packed ModeConfig;
+
+        ModeConfig() :
+            active_time     { 1000 },
+            passive_time    { 0 },
+            rise_time       { 0 },
+            fall_time       { 0 }
+        {
+        }
+    };
 
     static constexpr size_t MODE_CONFIG_SIZE { sizeof(ModeConfig) }; 
     static constexpr size_t MODE_CONFIG_COUNT { 16 }; 
@@ -140,13 +163,32 @@ namespace Feature {
 
     static constexpr size_t LUT_COUNT { 16 };
 
-    using ColorLUTEntry = uint32;
+    struct __packed ColorLUTEntry {
+        uint8 red;
+        uint8 green;
+        uint8 blue;
+        ColorLUTEntry() :
+            red     { 0x00 },
+            green   { 0x00 },
+            blue    { 0x00 }
+        {}
+        ColorLUTEntry(uint8 r, uint8 g, uint8 b) :
+            red     { r },
+            green   { g },
+            blue    { b }
+        {}
+    };
     static constexpr size_t COLOR_LUT_ENTRY_SIZE { sizeof(ColorLUTEntry) };
     static constexpr size_t COLOR_LUT_ENTRY_COUNT { LUT_COUNT };
     using ColorLUT = ColorLUTEntry[COLOR_LUT_ENTRY_COUNT];
     static constexpr size_t COLOR_LUT_SIZE { sizeof(ColorLUT) };
 
-    using BrightnessLUTEntry = uint16;
+    struct __packed BrightnessLUTEntry {
+        uint16 brightness;
+        BrightnessLUTEntry() : brightness { 0x0000 } {}
+        BrightnessLUTEntry(uint16 b) : brightness { b } {}
+        operator uint16() const { return brightness; }
+    };
     static constexpr size_t BRIGHTNESS_LUT_ENTRY_SIZE { sizeof(BrightnessLUTEntry) };
     static constexpr size_t BRIGHTNESS_LUT_ENTRY_COUNT { LUT_COUNT };
     using BrightnessLUT = BrightnessLUTEntry[BRIGHTNESS_LUT_ENTRY_COUNT];

@@ -230,7 +230,6 @@ AnalogInput::axis_value AnalogInput::get(size_t idx) const
     auto data = m_adc_data_total[idx];
     interrupts();
     int32 val = static_cast<int32>(data/ADC_DATA_AVG_COUNT)-AXIS_CENTER;
-    val = std::abs(val) < AXIS_DEADZONE ? 0 : val;
     return clamp_value<int32>(val*std::numeric_limits<int16>::max()/AXIS_MAX, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max());
 }
 

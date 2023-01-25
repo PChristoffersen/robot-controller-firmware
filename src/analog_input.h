@@ -31,7 +31,6 @@ class AnalogInput {
         inline void _isr();
     private:
         static constexpr size_t ADC_DATA_AVG_COUNT { 4 };
-        static constexpr axis_value AXIS_DEADZONE { 16u };
         static constexpr axis_value AXIS_CENTER { 2048 };
         static constexpr axis_value AXIS_MAX { 2040 };
 

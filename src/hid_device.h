@@ -5,6 +5,7 @@
 #include <limits>
 
 #include <config.h>
+#include <debug.h>
 #include "util.h"
 #include "feature_types.h"
 
@@ -83,7 +84,10 @@ class HIDDevice : public HIDReporter {
         }
         
 
-        void setAxis(axis_type axis, axis_value value) { m_report.axis[axis] = value; }
+        void setAxis(axis_type axis, axis_value value) 
+        { 
+            m_report.axis[axis] = value; 
+        }
         void set_dial(int value) 
         { 
             value = clamp_value(value, -7, 7); 
@@ -102,6 +106,8 @@ class HIDDevice : public HIDReporter {
             m_report.buttons = value;
         }
 
+
+        void set_report_pending() { m_report_pending = true; }
         bool is_report_pending() { return m_report_pending;  }
         void send_report() { sendReport(); m_report_pending = false; }
 

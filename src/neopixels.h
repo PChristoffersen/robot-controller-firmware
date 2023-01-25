@@ -16,16 +16,17 @@ class Neopixels {
 
         void begin();
 
-
         void show();
 
         void set(size_t pos, uint8 r, uint8 g, uint8 b);
 
+        bool is_dirty() const { return m_dirty; }
         static constexpr size_t count() { return PIXEL_COUNT; }
 
     private:
 
         uint8 m_pixel_buffer[PIXEL_COUNT*BYTES_PER_PIXEL];
+        bool m_dirty;
 
         static constexpr color_type from_rgb(uint8 r, uint8 g, uint8 b)
         {
