@@ -15,6 +15,7 @@ class HIDDevice : public HIDReporter {
         using button_value = uint16;
 
         static constexpr uint8 BUTTON_COUNT { sizeof(button_value)*8 };
+        static constexpr uint8 LED_COUNT { 5 };
 
         enum axis_type : uint8 {
             AXIS_X,
@@ -40,7 +41,8 @@ class HIDDevice : public HIDReporter {
         static constexpr uint8 REPORT_ID { 1 };
 
         enum FeatureId : uint8 {
-            FEATURE_DEFAULT,
+            FEATURE_COMMAND,
+            FEATURE_STATE,
             FEATURE_OUTPUT_CONFIGS,
             FEATURE_MODE_CONFIGS,
             FEATURE_COLOR_LUT,

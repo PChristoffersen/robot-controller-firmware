@@ -99,19 +99,29 @@ static constexpr uint8 report_descriptor[] {
                 HID_DESC_USAGE(0x4c),                           //          Usage (System suspend)
                 HID_DESC_USAGE(0x4b),                           //          Usage (Charging)
                 HID_DESC_USAGE(0x19),                           //          Usage (Message)
-                HID_DESC_USAGE(0x03),                           //          Usage (Scroll Lock)
-                HID_DESC_USAGE(0x05),                           //          Usage (Kana)
-                HID_DESC_USAGE(0x09),                           //          Usage (Mute)
                 HID_DESC_USAGE(0x4b),                           //          Usage (Generic)
+                //HID_DESC_USAGE(0x03),                         //          Usage (Scroll Lock)
+                //HID_DESC_USAGE(0x05),                         //          Usage (Kana)
+                //HID_DESC_USAGE(0x09),                         //          Usage (Mute)
    	            HID_DESC_REPORT_SIZE(1),                        //          Report Size (1)
-	            HID_DESC_REPORT_COUNT(8), 			            //          Report Count (8)
+	            HID_DESC_REPORT_COUNT(HIDDevice::LED_COUNT),    //          Report Count (8)
 	            HID_DESC_OUTPUT(0x02),				            //          Output (Data,Var,Abs)
             HID_DESC_COLLECTION_END(),                          //      End Collection (Logical)
+            HID_DESC_REPORT_SIZE(1),                            //      Padding Report Size (1)
+            HID_DESC_REPORT_COUNT(8-HIDDevice::LED_COUNT),	    //      Padding Report Count (8)
+            HID_DESC_OUTPUT(0x03),		    		            //      Padding Output (Const,Var,Abs)
 
 
         HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
-            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_DEFAULT),             //      Usage (Vendor Usage X)
-            HID_DESC_REPORT_SIZE(8*Feature::STATE_SIZE), 	                    //      Report size (8)
+            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_COMMAND),             //      Usage (Vendor Usage X)
+            HID_DESC_REPORT_SIZE(8*Feature::COMMAND_SIZE),                  //      Report size (8)
+            HID_DESC_REPORT_COUNT(1), 	                                    //      Report Count (*)
+            HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
+
+        HID_DESC_FEATURE_REPORT_ID(HIDDevice::FEATURE_STATE),
+        HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
+            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_STATE),               //      Usage (Vendor Usage X)
+            HID_DESC_REPORT_SIZE(8*Feature::STATE_SIZE),                    //      Report size (8)
             HID_DESC_REPORT_COUNT(1), 	                                    //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
@@ -151,6 +161,7 @@ static constexpr uint8 report_descriptor[] {
 static constexpr size_t OUTPUT_BUFFER_ALLOC_SIZE { HID_BUFFER_ALLOCATE_SIZE(HIDDevice::OUTPUT_BUFFER_SIZE,HIDDevice::REPORT_ID) };
 
 static constexpr size_t FEATURE_SIZE[HIDDevice::FEATURE_COUNT] {
+    Feature::COMMAND_SIZE,
     Feature::STATE_SIZE,
     Feature::OUTPUT_CONFIGS_SIZE,
     Feature::MODE_CONFIGS_SIZE,
@@ -163,6 +174,7 @@ static constexpr size_t FEATURE_SIZES[HIDDevice::FEATURE_COUNT] {
     HID_BUFFER_SIZE(FEATURE_SIZE[2], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(2))),
     HID_BUFFER_SIZE(FEATURE_SIZE[3], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(3))),
     HID_BUFFER_SIZE(FEATURE_SIZE[4], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(4))),
+    HID_BUFFER_SIZE(FEATURE_SIZE[5], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(5))),
 };
 static constexpr size_t FEATURE_BUFFER_SIZES[HIDDevice::FEATURE_COUNT] {
     HID_BUFFER_ALLOCATE_SIZE(FEATURE_SIZE[0], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(0))),
@@ -170,6 +182,7 @@ static constexpr size_t FEATURE_BUFFER_SIZES[HIDDevice::FEATURE_COUNT] {
     HID_BUFFER_ALLOCATE_SIZE(FEATURE_SIZE[2], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(2))),
     HID_BUFFER_ALLOCATE_SIZE(FEATURE_SIZE[3], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(3))),
     HID_BUFFER_ALLOCATE_SIZE(FEATURE_SIZE[4], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(4))),
+    HID_BUFFER_ALLOCATE_SIZE(FEATURE_SIZE[5], HIDDevice::FEATURE_REPORT_ID(static_cast<HIDDevice::FeatureId>(5))),
 };
 static constexpr size_t FEATURE_BUFFER_OFFSET[HIDDevice::FEATURE_COUNT] {
     OUTPUT_BUFFER_ALLOC_SIZE,
@@ -177,6 +190,7 @@ static constexpr size_t FEATURE_BUFFER_OFFSET[HIDDevice::FEATURE_COUNT] {
     OUTPUT_BUFFER_ALLOC_SIZE+FEATURE_BUFFER_SIZES[0]+FEATURE_BUFFER_SIZES[1],
     OUTPUT_BUFFER_ALLOC_SIZE+FEATURE_BUFFER_SIZES[0]+FEATURE_BUFFER_SIZES[1]+FEATURE_BUFFER_SIZES[2],
     OUTPUT_BUFFER_ALLOC_SIZE+FEATURE_BUFFER_SIZES[0]+FEATURE_BUFFER_SIZES[1]+FEATURE_BUFFER_SIZES[2]+FEATURE_BUFFER_SIZES[3],
+    OUTPUT_BUFFER_ALLOC_SIZE+FEATURE_BUFFER_SIZES[0]+FEATURE_BUFFER_SIZES[1]+FEATURE_BUFFER_SIZES[2]+FEATURE_BUFFER_SIZES[3]+FEATURE_BUFFER_SIZES[4],
 };
 static volatile uint8 g_feature_buffer_data[FEATURE_BUFFER_OFFSET[HIDDevice::FEATURE_COUNT-1]+FEATURE_BUFFER_SIZES[HIDDevice::FEATURE_COUNT-1]];
 
@@ -207,6 +221,7 @@ HIDDevice::HIDDevice(USBHID& HID) :
         { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[2]], FEATURE_SIZES[2], FEATURE_REPORT_ID(static_cast<FeatureId>(2)), HID_BUFFER_MODE_NO_WAIT },
         { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[3]], FEATURE_SIZES[3], FEATURE_REPORT_ID(static_cast<FeatureId>(3)), HID_BUFFER_MODE_NO_WAIT },
         { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[4]], FEATURE_SIZES[4], FEATURE_REPORT_ID(static_cast<FeatureId>(4)), HID_BUFFER_MODE_NO_WAIT },
+        { &g_feature_buffer_data[FEATURE_BUFFER_OFFSET[5]], FEATURE_SIZES[4], FEATURE_REPORT_ID(static_cast<FeatureId>(5)), HID_BUFFER_MODE_NO_WAIT },
     }
 {
     m_report.reportID = REPORT_ID;

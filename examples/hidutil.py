@@ -222,7 +222,7 @@ class Device:
         assert buf[0] == report_id
         fd = self.device.fileno()
         sz = _HIDIOCSFEATURE(fd, buf)
-        print(f"> {buf}")
+        #print(f"> {buf}")
         if sz != len(buf):
             raise OSError(f"Failed to write data: {data} - bytes written: {sz}")
 

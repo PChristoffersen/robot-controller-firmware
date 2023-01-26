@@ -8,6 +8,7 @@
 
 #include <config.h>
 #include <debug.h>
+#include "config_store.h"
 #include "leds.h"
 #include "neopixels.h"
 #include "buttons.h"
@@ -20,13 +21,12 @@
 
 
 
-#if ENABLE_USB
 static constexpr uint32 MIN_HID_REPORT_INTERVAL { 25 };
 static constexpr uint32 MIN_HID_FEATURE_INTERVAL { 50 };
 static USBHID HID;
 static HIDDevice g_hid_device(HID);
-#endif
 
+static ConfigStore      g_config_store;
 static Leds             g_leds;
 static Neopixels        g_neopixels;
 static Buttons          g_buttons;
@@ -40,14 +40,18 @@ static constexpr uint8 ANO_BUTTON_START { 0 };
 static constexpr uint8 BUTTON_START { 1 };
 
 
+/* ------------------------------------------------------------------
+ * Setup
+ * ------------------------------------------------------------------ */
+
 
 static void banner()
 {
-    Debug.println("----------------------------");
-    Debug.println("Robot Controller");
-    Debug.print  ("  Serial: "); Debug.println(get_unique_id_string());
-    Debug.println("----------------------------");
-    Debug.flush();
+    Console.println("----------------------------");
+    Console.println("Robot Controller");
+    Console.print  ("  Serial: "); Debug.println(get_unique_id_string());
+    Console.println("----------------------------");
+    Console.flush();
 }
 
 
@@ -63,89 +67,179 @@ void setup()
     digitalWrite(LED_BUILTIN, LOW);
 
     //Debug.begin(115200);
-    Debug.begin(921600);
+    Console.begin(CONSOLE_BAUD);
     banner();
 
+    Console.println();
 
-    Debug.println("Led init");
+    Console.print("Config init:        ");
+    g_config_store.begin();
+    Console.println("[done]");
+
+    Console.print("Led init:           ");
     g_leds.begin();
-    Debug.println("Neopixel init");
-    g_neopixels.begin();
-    Debug.println("ANO init");
-    g_ano_dial.begin();
-    Debug.println("Button init");
-    g_buttons.begin();
-    Debug.println("External IO init");
-    g_external_io.begin();
-    Debug.println("Analog input init");
-    g_analog_input.begin();
-    Debug.println("Feature engine init");
-    g_feature_engine.begin();
+    Console.println("[done]");
 
-    #if ENABLE_USB
-    Debug.println("USB init");
+    Console.print("Neopixel init       ");
+    g_neopixels.begin();
+    Console.println("[done]");
+
+    Console.print("ANO init            ");
+    g_ano_dial.begin();
+    Console.println("[done]");
+
+    Console.print("Button init         ");
+    g_buttons.begin();
+    Console.println("[done]");
+
+    Console.print("External IO init    ");
+    g_external_io.begin();
+    Console.println("[done]");
+
+    Console.print("Analog input init   ");
+    g_analog_input.begin();
+    Console.println("[done]");
+
+    Console.print("Feature engine init ");
+    g_feature_engine.begin(g_config_store);
+    Console.println("[done]");
+
+    Console.print("USB init            ");
     USBComposite.setManufacturerString(USB_MANUFACTURER_STRING);
     USBComposite.setProductString(USB_PRODUCT_STRING);
     USBComposite.setVendorId(USB_VID);
     USBComposite.setProductId(USB_PID);
     USBComposite.setSerialString(get_unique_id_string());
-
     HID.begin(HIDDevice::descriptor(), HIDDevice::descriptor_size());
     g_hid_device.begin();
-    g_hid_device.set_feature(HIDDevice::FEATURE_OUTPUT_CONFIGS,  g_feature_engine.output_configs());
-    g_hid_device.set_feature(HIDDevice::FEATURE_MODE_CONFIGS,    g_feature_engine.mode_configs());
-    g_hid_device.set_feature(HIDDevice::FEATURE_COLOR_LUT,      g_feature_engine.color_lut());
-    g_hid_device.set_feature(HIDDevice::FEATURE_BRIGHTNESS_LUT, g_feature_engine.brightness_lut());
-    #endif
+    g_hid_device.set_feature(HIDDevice::FEATURE_COMMAND,        Feature::COMMAND_NOOP);
+    g_hid_device.set_feature(HIDDevice::FEATURE_STATE,          g_feature_engine.state());
+    Console.println("[done]");
 
-    Debug.println("Setup complete");
+    Console.println();
+
+    Console.println("Loading configs");
+    if (!g_feature_engine.load_output_configs(g_config_store)) {
+        Console.println("  Using default output configs");
+    }
+    g_hid_device.set_feature(HIDDevice::FEATURE_OUTPUT_CONFIGS, g_feature_engine.output_configs());
+    if (!g_feature_engine.load_mode_configs(g_config_store)) {
+        Console.println("  Using default mode configs");
+    }
+    g_hid_device.set_feature(HIDDevice::FEATURE_MODE_CONFIGS,   g_feature_engine.mode_configs());
+    if (!g_feature_engine.load_color_lut(g_config_store)) {
+        Console.println("  Using default color LUT");
+    }
+    g_hid_device.set_feature(HIDDevice::FEATURE_COLOR_LUT,      g_feature_engine.color_lut());
+    if (!g_feature_engine.load_brightness_lut(g_config_store)) {
+        Console.println("  Using default brightness LUT");
+    }
+    g_hid_device.set_feature(HIDDevice::FEATURE_BRIGHTNESS_LUT, g_feature_engine.brightness_lut());
+
+    Console.println();
 
     #if ENABLE_WATCHDOG
-    Debug.println("Enabling watchdog");
+    Console.println("Enabling watchdog");
     watchdog_init();
     #endif
+
+    Console.println("Setup complete, starting main loop");
 }
 
 
+
+/* ------------------------------------------------------------------
+ * Command processing
+ * ------------------------------------------------------------------ */
+
+static void command_config_load(Feature::command_arg arg)
+{
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_OUTPUT_CONFIGS) {
+        Console.println("Loading output configs");
+        g_feature_engine.load_output_configs(g_config_store);
+        g_hid_device.set_feature(HIDDevice::FEATURE_OUTPUT_CONFIGS, g_feature_engine.output_configs());
+    }
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_MODE_CONFIGS) {
+        Console.println("Loading mode configs");
+        g_feature_engine.load_mode_configs(g_config_store);
+        g_hid_device.set_feature(HIDDevice::FEATURE_MODE_CONFIGS,   g_feature_engine.mode_configs());
+    }
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_COLOR_LUT) {
+        Console.println("Loading color LUT");
+        g_feature_engine.load_color_lut(g_config_store);
+        g_hid_device.set_feature(HIDDevice::FEATURE_COLOR_LUT,      g_feature_engine.color_lut());
+    }
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_BRIGHTNESS_LUT) {
+        Console.println("Loading brightness LUT");
+        g_feature_engine.load_brightness_lut(g_config_store);
+        g_hid_device.set_feature(HIDDevice::FEATURE_BRIGHTNESS_LUT, g_feature_engine.brightness_lut());
+    }
+}
+
+static void command_config_store(Feature::command_arg arg)
+{
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_OUTPUT_CONFIGS) {
+        Console.println("Saving output configs");
+        g_config_store.store(g_feature_engine.output_configs());
+    }
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_MODE_CONFIGS) {
+        Console.println("Saving mode configs");
+        g_config_store.store(g_feature_engine.mode_configs());
+    }
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_COLOR_LUT) {
+        Console.println("Saving color LUT");
+        g_config_store.store(g_feature_engine.color_lut());
+    }
+    if (arg & Feature::CONFIG_LOAD_STORE_ARG_BRIGHTNESS_LUT) {
+        Console.println("Saving brightness LUT");
+        g_config_store.store(g_feature_engine.brightness_lut());
+    }
+}
+
+static void command_config_erase(Feature::command_arg arg)
+{
+    Console.println("Erasing config store");
+    g_config_store.erase();
+    g_feature_engine.default_output_configs();
+    g_feature_engine.default_mode_configs();
+    g_feature_engine.default_color_lut();
+    g_feature_engine.default_brightness_lut();
+    g_hid_device.set_feature(HIDDevice::FEATURE_OUTPUT_CONFIGS, g_feature_engine.output_configs());
+    g_hid_device.set_feature(HIDDevice::FEATURE_MODE_CONFIGS,   g_feature_engine.mode_configs());
+    g_hid_device.set_feature(HIDDevice::FEATURE_COLOR_LUT,      g_feature_engine.color_lut());
+    g_hid_device.set_feature(HIDDevice::FEATURE_BRIGHTNESS_LUT, g_feature_engine.brightness_lut());
+}
+
+
+static void process_command(Feature::Command &command) 
+{
+    switch (command.id) {
+        case Feature::CommandId::NOOP:
+            break;
+        case Feature::CommandId::CONFIG_LOAD:
+            command_config_load(command.arg);
+            break;
+        case Feature::CommandId::CONFIG_STORE:
+            command_config_store(command.arg);
+            break;
+        case Feature::CommandId::CONFIG_ERASE:
+            command_config_erase(command.arg);
+            break;
+    }
+}
+
+
+
+
+/* ------------------------------------------------------------------
+ * Event processing
+ * ------------------------------------------------------------------ */
 
 static void update_neopixel()
 {
     static constexpr uint32 MIN_SHOW_INTERVAL { 20 };
     static unsigned long last = 0;
     auto now = millis();
-
-    #if 0
-    static uint16 brightness = 0x10*20;
-    static bool dir = true;
-    static uint32 last_b = 0;
-    if ((now-last_b)>5) {
-        g_leds.set(Leds::LED_1, brightness);
-        g_leds.set(Leds::LED_2, brightness);
-        g_leds.set(Leds::LED_3, brightness);
-        g_leds.set(Leds::LED_4, brightness);
-        //Serial1.println(brightness);
-        if (dir)
-            brightness+=0x200;
-        else
-            brightness-=0x200;
-        if (brightness>0xFFFF-0x200 || brightness < 0x200)
-            dir = !dir;
-        last_b = now;
-    }
-    #endif
-
-    #if 0
-    static uint8 state = 0;
-    static unsigned long last_ = 0;
-    if ((now-last_)>1000) {
-        g_neopixels.set((0+state)%g_neopixels.count(), 0x04, 0x00, 0x00);
-        g_neopixels.set((1+state)%g_neopixels.count(), 0x00, 0x04, 0x00);
-        g_neopixels.set((2+state)%g_neopixels.count(), 0x04, 0x00, 0x04);
-        g_neopixels.set((3+state)%g_neopixels.count(), 0x04, 0x04, 0x00);
-        state++;
-        last_ = now;
-    }
-    #endif
 
     if ((now-last)<MIN_SHOW_INTERVAL)
         return;
@@ -158,21 +252,6 @@ static void update_neopixel()
 
 
 
-static void update_misc()
-{
-    static unsigned long last = 0;
-    auto now = millis();
-    if ((now-last)>250) {
-        //DebugPrint(millis(), DEC);
-        //DebugPrintLn();
-        last = now;
-    }
-
-}
-
-
-
-#if ENABLE_USB
 
 static void update_ano() 
 {
@@ -387,7 +466,14 @@ static void update_usb_features()
             g_feature_engine.set_usb_leds(output.leds);
         }
 
-        if ( (res=g_hid_device.read_feature(HIDDevice::FEATURE_DEFAULT, g_feature_engine.output_configs())) ) {
+        Feature::Command command;
+        if ( (res=g_hid_device.read_feature(HIDDevice::FEATURE_COMMAND, command)) ) {
+            DebugPrint("Command ");
+            DebugPrintLn(res);
+            process_command(command);
+            g_hid_device.set_feature(HIDDevice::FEATURE_COMMAND, Feature::COMMAND_NOOP);
+        }
+        if ( (res=g_hid_device.read_feature(HIDDevice::FEATURE_STATE, g_feature_engine.output_configs())) ) {
             DebugPrint("OutputConfigs ");
             DebugPrintLn(res);
             g_feature_engine.dirty_output_configs();
@@ -458,7 +544,6 @@ static void update_usb()
 
 }
 
-#endif
 
 
 static void update_features()
@@ -485,8 +570,6 @@ static void update_builtin_led()
 
 void loop() 
 {
-    update_misc();
-
     update_ano();
     update_buttons();
     update_external();

@@ -2,9 +2,11 @@
 
 #include <Arduino.h>
 
-#define ENABLE_USB 1
 #define ENABLE_WATCHDOG 0
 #define ENABLE_DEBUG 1
+
+#define Console Serial1
+static constexpr uint32 CONSOLE_BAUD { 921600 };
 
 static constexpr uint8 ANO_ENCA_PIN      { PB3  };
 static constexpr uint8 ANO_ENCB_PIN      { PB4  };
@@ -35,6 +37,8 @@ static constexpr uint8 EXT_OUT2          { PB11 };
 static constexpr uint8 AUX_PIN           { PC14 };
 static constexpr uint8 PCF8574_INT_PIN   { PC15 };
 
+static constexpr size_t EXT_IN_COUNT { 2 };
+static constexpr size_t EXT_OUT_COUNT { 2 };
 static constexpr size_t LED_COUNT { 4 };
 static constexpr size_t NEOPIXEL_COUNT { 4 };
 static constexpr size_t NEOPIXEL_BYTES_PER_PIXEL { 3 };

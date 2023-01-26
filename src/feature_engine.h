@@ -6,6 +6,7 @@
 #include "leds.h"
 #include "neopixels.h"
 #include "external_io.h"
+#include "config_store.h"
 
 namespace Feature {
 
@@ -15,7 +16,17 @@ namespace Feature {
 
             Engine(Leds &leds, Neopixels &neopixels, ExternalIO &external_io);
 
-            void begin();
+            void begin(ConfigStore &store);
+
+            bool load_output_configs(ConfigStore &store);
+            bool load_mode_configs(ConfigStore &store);
+            bool load_color_lut(ConfigStore &store);
+            bool load_brightness_lut(ConfigStore &store);
+
+            void default_output_configs();
+            void default_mode_configs();
+            void default_color_lut();
+            void default_brightness_lut();
 
             void update();
 
@@ -24,7 +35,7 @@ namespace Feature {
             void set_buttons(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_BUTTON_FIRST, INPUT_BUTTON_MASK); }
 
             State &state() { return m_state; }
-            void state_dirty() { m_state_dirty = true; set_inputs(static_cast<input_type>(m_state.soft_input)<<INPUT_SOFTWARE_FIRST, INPUT_SOFTWARE_MASK); }
+            void dirty_state() { m_state_dirty = true; set_inputs(static_cast<input_type>(m_state.soft_input)<<INPUT_VIRTUAL_FIRST, INPUT_VIRTUAL_MASK); }
 
             OutputConfigs &output_configs() { return m_output_configs; }
             void dirty_output_configs() { m_output_configs_dirty = true; }
@@ -42,18 +53,21 @@ namespace Feature {
             using brightness_type = Leds::brightness_type;
             using color_type = ColorLUTEntry;
 
-            static constexpr uint32 UPDATE_INTERVAL { 20 };
+            static constexpr uint32 UPDATE_INTERVAL { 10 };
 
             struct OutputState {
                 uint32 start_time;
                 bool active;
                 const OutputConfigEntry *config;
             };
-            OutputState m_outputs[OUTPUT_COUNT];
 
             Leds &m_leds;
             Neopixels &m_neopixels;
             ExternalIO &m_external_io;
+
+            OutputState m_outputs[OUTPUT_COUNT];
+
+            bool m_animating;
 
             input_type m_inputs;
             bool m_input_dirty;
@@ -78,6 +92,7 @@ namespace Feature {
             void set_inputs(uint32 values, uint32 mask);
 
             bool calculate_output(uint32 now);
+            bool calculate_modes(uint32 now);
             void update_leds(uint32 now);
             void update_neopixels(uint32 now);
             void update_external(uint32 now);
