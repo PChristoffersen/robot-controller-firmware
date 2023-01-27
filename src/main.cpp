@@ -319,6 +319,11 @@ static void update_ano()
         DebugPrint(st, BIN);
         DebugPrintLn("  ");
         DebugPrint((int)hat);
+        DebugPrint(" ");
+        DebugPrint(g_ano_dial.get_switch(AnoDial::SW_UP)?"Up ":"");
+        DebugPrint(g_ano_dial.get_switch(AnoDial::SW_DOWN)?"Down ":"");
+        DebugPrint(g_ano_dial.get_switch(AnoDial::SW_LEFT)?"Left ":"");
+        DebugPrint(g_ano_dial.get_switch(AnoDial::SW_RIGHT)?"Right ":"");
         DebugPrintLn();
         #endif
         g_hid_device.set_hat(hat);

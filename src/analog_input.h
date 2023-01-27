@@ -32,7 +32,7 @@ class AnalogInput {
     private:
         static constexpr size_t ADC_DATA_AVG_COUNT { 4 };
         static constexpr axis_value AXIS_CENTER { 2048 };
-        static constexpr axis_value AXIS_MAX { 2040 };
+        static constexpr axis_value AXIS_MAX { 2048 };
 
         uint32 m_adc_data_cnt; 
         uint16 m_adc_data[AXIS_COUNT][ADC_DATA_AVG_COUNT];

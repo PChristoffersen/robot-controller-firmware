@@ -14,7 +14,7 @@ class HIDDevice : public HIDReporter {
         using axis_value = int16;
         using button_value = uint16;
 
-        static constexpr uint8 BUTTON_COUNT { sizeof(button_value)*8 };
+        static constexpr uint8 BUTTON_COUNT { 9 };
         static constexpr uint8 LED_COUNT { 5 };
 
         enum axis_type : uint8 {
@@ -89,11 +89,12 @@ class HIDDevice : public HIDReporter {
         void setAxis(axis_type axis, axis_value value) 
         { 
             m_report.axis[axis] = value; 
+            //m_report_pending = true;
         }
         void set_dial(int value) 
         { 
             value = clamp_value(value, -7, 7); 
-            m_report_pending = (value!=m_report.dial);
+            m_report_pending = (value!=0) && (value!=m_report.dial);
             m_report.dial = value;
         }
         void set_hat(hat_position pos) 
@@ -111,7 +112,11 @@ class HIDDevice : public HIDReporter {
 
         void set_report_pending() { m_report_pending = true; }
         bool is_report_pending() { return m_report_pending;  }
-        void send_report() { sendReport(); m_report_pending = false; }
+        void send_report() 
+        { 
+            sendReport(); 
+            m_report_pending = false; 
+        }
 
         static const uint8 *descriptor();
         static const size_t descriptor_size();

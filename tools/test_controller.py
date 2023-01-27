@@ -2,14 +2,11 @@
 
 from time import sleep
 import hidutil
-from controller import Controller, Output, Input, LUT
-
-vid = 0x0483
-pid = 0x5740
+from controller import Controller, Output, Input
 
 
 def main():
-    with hidutil.find_device(vid, pid) as dev:
+    with hidutil.find_device(Controller.VID, Controller.PID) as dev:
         controller = Controller(dev)
 
         controller.output_configs[Output.LED1.value][0].enable = Input.TRUE.value
@@ -73,19 +70,13 @@ def main():
         controller.mode_configs[4].passive_time = 500
         controller.update_mode_configs()
 
-        controller.brightness_lut[2].brightness = 0xFFFF
-        controller.brightness_lut[3].brightness = 0x0000
+        controller.brightness_lut[2].set(0xFFFF)
+        controller.brightness_lut[3].set(0x0000)
         controller.update_brightness_lut()
 
-        controller.color_lut[10].red   = 0x20
-        controller.color_lut[10].green = 0x00
-        controller.color_lut[10].blue  = 0x00
-        controller.color_lut[11].red   = 0x00
-        controller.color_lut[11].green = 0x00
-        controller.color_lut[11].blue  = 0x20
-        controller.color_lut[12].red   = 0x00
-        controller.color_lut[12].green = 0x20
-        controller.color_lut[12].blue  = 0x00
+        controller.color_lut[10].set(0x20, 0x00, 0x00)
+        controller.color_lut[11].set(0x00, 0x20, 0x00)
+        controller.color_lut[12].set(0x00, 0x00 ,0x20)
         controller.update_color_lut()
 
 

@@ -92,6 +92,9 @@ static constexpr uint8 report_descriptor[] {
             HID_DESC_UNIT_EXPONENT(0x00),                       //      Unit Exponent (0) 
             HID_DESC_UNIT(0x00),                                //      Unit (None)
 	        HID_DESC_INPUT(0x02),						        //      Input (variable,absolute)
+            HID_DESC_REPORT_SIZE(1),                            //      Padding Report Size (1)
+            HID_DESC_REPORT_COUNT(sizeof(HIDDevice::button_value)*8-HIDDevice::BUTTON_COUNT),  //      Padding Report Count (X)
+            HID_DESC_OUTPUT(0x03),		    		            //      Padding Output (Const,Var,Abs)
 
         HID_DESC_USAGE_PAGE(0x08),                              //   Usage Page (Leds)
             HID_DESC_COLLECTION_BEGIN(0x02),                    //      Collection (Logical)
@@ -108,7 +111,7 @@ static constexpr uint8 report_descriptor[] {
 	            HID_DESC_OUTPUT(0x02),				            //          Output (Data,Var,Abs)
             HID_DESC_COLLECTION_END(),                          //      End Collection (Logical)
             HID_DESC_REPORT_SIZE(1),                            //      Padding Report Size (1)
-            HID_DESC_REPORT_COUNT(8-HIDDevice::LED_COUNT),	    //      Padding Report Count (8)
+            HID_DESC_REPORT_COUNT(8-HIDDevice::LED_COUNT),	    //      Padding Report Count (X)
             HID_DESC_OUTPUT(0x03),		    		            //      Padding Output (Const,Var,Abs)
 
 
