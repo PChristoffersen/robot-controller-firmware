@@ -34,8 +34,8 @@ namespace Feature {
             void set_usb_leds(uint8 input)   { set_inputs(static_cast<input_type>(input)<<INPUT_USB_LED_FIRST, INPUT_USB_LED_MASK); }
             void set_buttons(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_BUTTON_FIRST, INPUT_BUTTON_MASK); }
 
-            State &state() { return m_state; }
-            void dirty_state() { m_state_dirty = true; set_inputs(static_cast<input_type>(m_state.soft_input)<<INPUT_VIRTUAL_FIRST, INPUT_VIRTUAL_MASK); }
+            SoftInput &soft_input() { return m_soft_input; }
+            void dirty_soft_input() { m_soft_input_dirty = true; set_inputs(static_cast<input_type>(m_soft_input.input)<<INPUT_SOFT_FIRST, INPUT_SOFT_MASK); }
 
             OutputConfigs &output_configs() { return m_output_configs; }
             void dirty_output_configs() { m_output_configs_dirty = true; }
@@ -74,8 +74,8 @@ namespace Feature {
 
             uint32 m_last_update;
 
-            State m_state;
-            bool m_state_dirty;
+            SoftInput m_soft_input;
+            bool m_soft_input_dirty;
 
             OutputConfigs m_output_configs;
             bool m_output_configs_dirty;

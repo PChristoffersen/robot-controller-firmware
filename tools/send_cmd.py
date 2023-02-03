@@ -4,7 +4,7 @@ import argcomplete
 import argparse
 import hidutil
 from typing import List
-from controller import Controller, CommandLoadStoreArg, Output, VirtualInput, Brightness, Color, Colors, ModeConfig, OutputConfigEntry, OutputConfig, Input
+from controller import Controller, CommandLoadStoreArg, Output, SoftInput, Brightness, Color, Colors, ModeConfig, OutputConfigEntry, OutputConfig, Input
 
 
 def color_completer():
@@ -13,8 +13,8 @@ def color_completer():
     return colors
 
 
-def print_inputs(prefix: str, virt: VirtualInput):
-    inputs = [val.name.lower() for val in virt.__class__ if val in virt]
+def print_inputs(prefix: str, inp: SoftInput):
+    inputs = [val.name.lower() for val in inp.__class__ if val in inp]
     if inputs:
         print(f"{prefix}: {', '.join(inputs)}")
     else:
@@ -55,14 +55,14 @@ def main():
     config_store_parser.add_argument("arg", choices=CommandLoadStoreArg.list(), nargs="+")
     config_erase_parser = config_subparsers.add_parser('erase', help='Erase configuration')
 
-    virtual_parser = subparsers.add_parser("virtual", help='Virtual input')
-    virtual_subparsers = virtual_parser.add_subparsers(dest='action')
-    virtual_subparsers.required = True
-    virtual_list_parser = virtual_subparsers.add_parser('list', help='List')
-    virtual_set_parser = virtual_subparsers.add_parser('set', help='Set inputs')
-    virtual_set_parser.add_argument("inputs", choices=VirtualInput.list(), nargs="+")
-    virtual_clear_parser = virtual_subparsers.add_parser('clear', help='Clear inputs')
-    virtual_clear_parser.add_argument("inputs", choices=VirtualInput.list(), nargs="+")
+    soft_input_parser = subparsers.add_parser("soft", help='Soft input')
+    soft_input_subparsers = soft_input_parser.add_subparsers(dest='action')
+    soft_input_subparsers.required = True
+    soft_input_list_parser = soft_input_subparsers.add_parser('list', help='List')
+    soft_input_set_parser = soft_input_subparsers.add_parser('set', help='Set inputs')
+    soft_input_set_parser.add_argument("inputs", choices=SoftInput.list(), nargs="+")
+    soft_input_clear_parser = soft_input_subparsers.add_parser('clear', help='Clear inputs')
+    soft_input_clear_parser.add_argument("inputs", choices=SoftInput.list(), nargs="+")
 
     output_parser = subparsers.add_parser("output", help='Output config')
     output_subparsers = output_parser.add_subparsers(dest='action')
@@ -122,21 +122,21 @@ def main():
                 print(f"Config erase")
                 controller.cmd_config_erase()
 
-        elif args.command == 'virtual':
+        elif args.command == 'soft':
             if args.action == 'list':
-                print_inputs("Inputs", controller.virtual_input)
+                print_inputs("Inputs", controller.soft_input)
             if args.action == 'set':
-                vals = VirtualInput.from_list(args.inputs)
+                vals = SoftInput.from_list(args.inputs)
                 print_inputs("Set", vals)
-                controller.virtual_input |= vals
-                controller.update_virtual_input()
-                print_inputs("Result", controller.virtual_input)
+                controller.soft_input |= vals
+                controller.update_soft_input()
+                print_inputs("Result", controller.soft_input)
             if args.action == 'clear':
-                vals = VirtualInput.from_list(args.inputs)
+                vals = SoftInput.from_list(args.inputs)
                 print_inputs("Clear", vals)
-                controller.virtual_input &= ~vals
-                controller.update_virtual_input()
-                print_inputs("Result", controller.virtual_input)
+                controller.soft_input &= ~vals
+                controller.update_soft_input()
+                print_inputs("Result", controller.soft_input)
 
         elif args.command == 'output':
             if args.action == 'list':

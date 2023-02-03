@@ -34,7 +34,7 @@ void Engine::begin(ConfigStore &store)
     default_color_lut();
     default_brightness_lut();
     
-    dirty_state();
+    dirty_soft_input();
     dirty_mode_configs();
     dirty_output_configs();
     dirty_brightness_lut();
@@ -311,7 +311,7 @@ void Engine::update()
         m_brightness_lut_dirty = false;
         m_output_configs_dirty = false;
         m_input_dirty = false;
-        m_state_dirty = false;
+        m_soft_input_dirty = false;
         m_last_update = now;
 
         #if TIME_UPDATE

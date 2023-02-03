@@ -28,16 +28,16 @@ namespace Feature {
         USB_LED3, 
         USB_LED4,
         USB_LED5,
-        VIRTUAL1,
-        VIRTUAL2,
-        VIRTUAL3,
-        VIRTUAL4,
-        VIRTUAL5,
-        VIRTUAL6,
-        VIRTUAL7,
-        VIRTUAL8,
-        VIRTUAL9,
-        VIRTUAL10,
+        SOFT1,
+        SOFT2,
+        SOFT3,
+        SOFT4,
+        SOFT5,
+        SOFT6,
+        SOFT7,
+        SOFT8,
+        SOFT9,
+        SOFT10,
         _COUNT
     };
     static_assert(static_cast<uint8>(Input::_COUNT)==32);
@@ -60,10 +60,10 @@ namespace Feature {
     static constexpr uint8  INPUT_USB_LED_LAST     { static_cast<uint8>(Input::USB_LED5) };
     static constexpr uint8  INPUT_USB_LED_COUNT    { INPUT_USB_LED_LAST-INPUT_USB_LED_FIRST+1 };
     static constexpr uint32 INPUT_USB_LED_MASK     { ((1ul<<INPUT_USB_LED_COUNT)-1)<<INPUT_USB_LED_FIRST };
-    static constexpr uint8  INPUT_VIRTUAL_FIRST    { static_cast<uint8>(Input::VIRTUAL1) };
-    static constexpr uint8  INPUT_VIRTUAL_LAST     { static_cast<uint8>(Input::VIRTUAL10) };
-    static constexpr uint8  INPUT_VIRTUAL_COUNT    { INPUT_VIRTUAL_LAST-INPUT_VIRTUAL_FIRST+1 };
-    static constexpr uint32 INPUT_VIRTUAL_MASK     { ((1ul<<INPUT_VIRTUAL_COUNT)-1)<<INPUT_VIRTUAL_FIRST };
+    static constexpr uint8  INPUT_SOFT_FIRST       { static_cast<uint8>(Input::SOFT1) };
+    static constexpr uint8  INPUT_SOFT_LAST        { static_cast<uint8>(Input::SOFT10) };
+    static constexpr uint8  INPUT_SOFT_COUNT       { INPUT_SOFT_LAST-INPUT_SOFT_FIRST+1 };
+    static constexpr uint32 INPUT_SOFT_MASK        { ((1ul<<INPUT_SOFT_COUNT)-1)<<INPUT_SOFT_FIRST };
     static_assert(INPUT_EXT_COUNT==::EXT_IN_COUNT);
 
 
@@ -88,16 +88,16 @@ namespace Feature {
     static constexpr Command COMMAND_NOOP {};
 
 
-    using virtual_input_type = uint16;
-    static_assert(sizeof(virtual_input_type)*8>=INPUT_VIRTUAL_COUNT);
-    struct __packed State {
-        virtual_input_type soft_input : INPUT_VIRTUAL_COUNT;
-        virtual_input_type _pack1 : (8*sizeof(virtual_input_type)-INPUT_VIRTUAL_COUNT);
-        State() :
-            soft_input { 0x0000 }
+    using soft_input_type = uint16;
+    static_assert(sizeof(soft_input_type)*8>=INPUT_SOFT_COUNT);
+    struct __packed SoftInput {
+        soft_input_type input : INPUT_SOFT_COUNT;
+        soft_input_type _pack1 : (8*sizeof(soft_input_type)-INPUT_SOFT_COUNT);
+        SoftInput() :
+            input { 0x0000 }
         {}
     };
-    static constexpr size_t STATE_SIZE { sizeof(State) };
+    static constexpr size_t SOFT_INPUT_SIZE { sizeof(SoftInput) };
 
     enum class Output : uint8 {
         EXT_OUT1,
@@ -129,12 +129,12 @@ namespace Feature {
 
 
     struct __packed OutputConfigEntry {
-        bool  enable_inv: 1;
         uint8 _pack1: 2;
+        bool  enable_inv: 1;
         uint8 enable: 5;
 
-        bool  active_inv: 1;
         uint8 _pack2: 2;
+        bool  active_inv: 1;
         uint8 active: 5;
 
         uint8 active_mode: 4;

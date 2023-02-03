@@ -42,7 +42,7 @@ class HIDDevice : public HIDReporter {
 
         enum FeatureId : uint8 {
             FEATURE_COMMAND,
-            FEATURE_STATE,
+            FEATURE_SOFT_INPUT,
             FEATURE_OUTPUT_CONFIGS,
             FEATURE_MODE_CONFIGS,
             FEATURE_COLOR_LUT,

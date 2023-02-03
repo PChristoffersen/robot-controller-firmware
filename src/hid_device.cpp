@@ -121,10 +121,10 @@ static constexpr uint8 report_descriptor[] {
             HID_DESC_REPORT_COUNT(1), 	                                    //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
-        HID_DESC_FEATURE_REPORT_ID(HIDDevice::FEATURE_STATE),
+        HID_DESC_FEATURE_REPORT_ID(HIDDevice::FEATURE_SOFT_INPUT),
         HID_DESC_USAGE_PAGE16(0xFF00),                                      //   Usage Page (Vendor Defined Page 1)
-            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_STATE),               //      Usage (Vendor Usage X)
-            HID_DESC_REPORT_SIZE(8*Feature::STATE_SIZE),                    //      Report size (8)
+            HID_DESC_FEATURE_USAGE(HIDDevice::FEATURE_SOFT_INPUT),          //      Usage (Vendor Usage X)
+            HID_DESC_REPORT_SIZE(8*Feature::SOFT_INPUT_SIZE),               //      Report size (8)
             HID_DESC_REPORT_COUNT(1), 	                                    //      Report Count (*)
             HID_DESC_FEATURE(0x02),                                         //      Feature (Data,Var,Abs)
 
@@ -165,7 +165,7 @@ static constexpr size_t OUTPUT_BUFFER_ALLOC_SIZE { HID_BUFFER_ALLOCATE_SIZE(HIDD
 
 static constexpr size_t FEATURE_SIZE[HIDDevice::FEATURE_COUNT] {
     Feature::COMMAND_SIZE,
-    Feature::STATE_SIZE,
+    Feature::SOFT_INPUT_SIZE,
     Feature::OUTPUT_CONFIGS_SIZE,
     Feature::MODE_CONFIGS_SIZE,
     Feature::COLOR_LUT_SIZE,

@@ -113,7 +113,7 @@ void setup()
     HID.begin(HIDDevice::descriptor(), HIDDevice::descriptor_size());
     g_hid_device.begin();
     g_hid_device.set_feature(HIDDevice::FEATURE_COMMAND,        Feature::COMMAND_NOOP);
-    g_hid_device.set_feature(HIDDevice::FEATURE_STATE,          g_feature_engine.state());
+    g_hid_device.set_feature(HIDDevice::FEATURE_SOFT_INPUT,     g_feature_engine.soft_input());
     Console.println("[done]");
 
     Console.println();
@@ -478,10 +478,10 @@ static void update_usb_features()
             process_command(command);
             g_hid_device.set_feature(HIDDevice::FEATURE_COMMAND, Feature::COMMAND_NOOP);
         }
-        if ( (res=g_hid_device.read_feature(HIDDevice::FEATURE_STATE, g_feature_engine.output_configs())) ) {
-            DebugPrint("OutputConfigs ");
+        if ( (res=g_hid_device.read_feature(HIDDevice::FEATURE_SOFT_INPUT, g_feature_engine.soft_input())) ) {
+            DebugPrint("SoftInput ");
             DebugPrintLn(res);
-            g_feature_engine.dirty_output_configs();
+            g_feature_engine.dirty_soft_input();
         }
         if ( (res=g_hid_device.read_feature(HIDDevice::FEATURE_OUTPUT_CONFIGS, g_feature_engine.output_configs())) ) {
             DebugPrint("OutputConfigs ");

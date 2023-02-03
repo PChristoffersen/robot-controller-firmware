@@ -56,14 +56,14 @@ class _ControllerIntEnum(IntEnum):
 
 
 
-class State(_ControllerStructure):
+class SoftInputState(_ControllerStructure):
     _pack_ = 1
     _fields_ = [
-        ('virtual_input', ctypes.c_uint16, 10),
-        ('_pack1',        ctypes.c_uint16, 6),
+        ('input',  ctypes.c_uint16, 10),
+        ('_pack1', ctypes.c_uint16, 6),
     ]
 
-class VirtualInput(_ControllerIntFlag):
+class SoftInput(_ControllerIntFlag):
     IN1 = auto()
     IN2 = auto()
     IN3 = auto()
@@ -88,11 +88,11 @@ class ModeConfig(_ControllerStructure):
 class OutputConfigEntry(_ControllerStructure):
     _pack_ = 1
     _fields_ = [
-        ("enable_inv"   , ctypes.c_uint8, 1),
         ("_pack1"       , ctypes.c_uint8, 2),
+        ("enable_inv"   , ctypes.c_uint8, 1),
         ("enable"       , ctypes.c_uint8, 5),
-        ("active_inv"   , ctypes.c_uint8, 1),
         ("_pack2"       , ctypes.c_uint8, 2),
+        ("active_inv"   , ctypes.c_uint8, 1),
         ("active"       , ctypes.c_uint8, 5),
         ("active_mode"  , ctypes.c_uint8, 4),
         ("passive_mode" , ctypes.c_uint8, 4),
@@ -228,16 +228,16 @@ class Input(_ControllerIntEnum):
     USB_LED3    = auto()
     USB_LED4    = auto()
     USB_LED5    = auto()
-    VIRTUAL1    = auto()
-    VIRTUAL2    = auto()
-    VIRTUAL3    = auto()
-    VIRTUAL4    = auto()
-    VIRTUAL5    = auto()
-    VIRTUAL6    = auto()
-    VIRTUAL7    = auto()
-    VIRTUAL8    = auto()
-    VIRTUAL9    = auto()
-    VIRTUAL10   = auto()
+    SOFT1       = auto()
+    SOFT2       = auto()
+    SOFT3       = auto()
+    SOFT4       = auto()
+    SOFT5       = auto()
+    SOFT6       = auto()
+    SOFT7       = auto()
+    SOFT8       = auto()
+    SOFT9       = auto()
+    SOFT10      = auto()
 
 
 class Output(_ControllerIntEnum):
@@ -292,7 +292,7 @@ class LUT(IntEnum):
 
 class FeatureId(Enum):
     COMMAND         = auto()
-    STATE           = auto()
+    SOFT_INPUT      = auto()
     OUTPUT_CONFIGS  = auto()
     MODE_CONFIG     = auto()
     COLOR_LUT       = auto()
@@ -313,8 +313,8 @@ class Controller:
         self._color_lut_buffer = None
         self._brightness_lut = None
         self._brightness_lut_buffer = None
-        self._state = None
-        self._state_buffer = None
+        self._soft_input = None
+        self._soft_input_buffer = None
 
 
     def cmd_config_store(self, arg: CommandLoadStoreArg):
@@ -351,26 +351,29 @@ class Controller:
 
 
     @property
-    def virtual_input(self):
-        return VirtualInput(self.state.virtual_input)
+    def soft_input(self) -> SoftInput:
+        return SoftInput(self.soft_input_state.input)
 
-    @virtual_input.setter
-    def virtual_input(self, input: VirtualInput):
-        self.state.virtual_input = input.value
+    @soft_input.setter
+    def soft_input_input(self, input: SoftInput):
+        self.soft_input_state.input = input.value
 
-    def update_virtual_input(self):
-        self.update_state()
+    def soft_input_set(self, input: SoftInput):
+        self.soft_input_state.input |= input
+
+    def soft_input_clear(self, input: SoftInput):
+        self.soft_input_state.input &= ~input
 
     @property
-    def state(self) -> State:
-        if not self._state_buffer:
-            self._state_buffer = self._device.get_feature_report(FeatureId.STATE.value)
-            self._state = State.from_buffer(self._state_buffer)
-        return self._state
+    def soft_input_state(self) -> SoftInputState:
+        if not self._soft_input_buffer:
+            self._soft_input_buffer = self._device.get_feature_report(FeatureId.SOFT_INPUT.value)
+            self._soft_input = SoftInputState.from_buffer(self._soft_input_buffer)
+        return self._soft_input
 
-    def update_state(self):
-        if self._state_buffer:
-            self._device.set_feature_report(FeatureId.STATE.value, self._state_buffer)
+    def update_soft_input(self):
+        if self._soft_input_buffer:
+            self._device.set_feature_report(FeatureId.SOFT_INPUT.value, self._soft_input_buffer)
 
 
     @property
