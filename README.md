@@ -1,10 +1,31 @@
+# Robot Controller
+
+Robot controller for us with [ROS](https://www.ros.org/) 
+
+![Controller](doc/Controller.png)
+
+# Hardware
+
+- [Waveshare 5.5inch AMOLED screen](https://www.waveshare.com/wiki/5.5inch_HDMI_AMOLED)
+- Rasbperry Pi 4 or similar
+- STM32F103 BluePill micro controller
+- 2x JH-D300X-R4 3 Axis joystick
+- [Adafruit ANO Rotary Encoder](https://learn.adafruit.com/ano-rotary-encoder)
+- 4x [Sparkfun LED Tactile Button](https://www.sparkfun.com/products/10439)
+- 4x [Sparkfun LED Tactile Button Breakout](https://www.sparkfun.com/products/10467)
+- 4x 12mm Tactile Push button
+
 
 # Schematic 
 
 See documentation [schematic](doc/Schematic.pdf)
 
+Button breakout board [gerber](doc/Button-breakout-board.zip)
+Controller board [gerber](doc/Controller-board.zip)
 
-# Pinout
+# BluePill 
+
+## Pinout
 
 |Function|Mode|Pin||Pin|Mode|Function|
 |---        |---    |--- |---|--- |---  |---        |
@@ -31,7 +52,7 @@ See documentation [schematic](doc/Schematic.pdf)
 |           |       |3V3 |   |VBAT|     |           |
 
 
-# PCF8574AN (i2c gpio expander)
+## PCF8574AN (i2c gpio expander)
 |Pin|Function|
 |---|---|
 |0|RIGHT_X|
@@ -44,20 +65,7 @@ See documentation [schematic](doc/Schematic.pdf)
 |7|TOP_PWR_SW|
 
 
-# Unassigned
-
-PI_ACT1
-PI_ACT2
-PI_ACT3
-PI_ACT4
-
-PI_PWR_SIG
-VBATT
-BATT_EN
-
-
-
-# Timer usage
+## Timer usage
 
 |Timer|Usage|
 |---|---|
