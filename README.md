@@ -1,6 +1,6 @@
 # Robot Controller
 
-Robot controller for us with [ROS](https://www.ros.org/) 
+Robot controller for use with [ROS](https://www.ros.org/) 
 
 ![Controller](doc/Controller.png)
 
