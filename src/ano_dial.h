@@ -6,13 +6,18 @@
 class AnoDial {
     public:
         enum Switch {
-            SW_CENTER,
-            SW_DOWN,
-            SW_RIGHT,
-            SW_UP,
-            SW_LEFT,
+            SW_1,
+            SW_2,
+            SW_3,
+            SW_4,
+            SW_5,
             N_SWITCHES,
         };
+        static constexpr Switch SW_CENTER { Switch::SW_1 };
+        static constexpr Switch SW_DOWN   { Switch::SW_2 };
+        static constexpr Switch SW_RIGHT  { Switch::SW_3 };
+        static constexpr Switch SW_UP     { Switch::SW_4 };
+        static constexpr Switch SW_LEFT   { Switch::SW_5 };
 
         AnoDial();
     

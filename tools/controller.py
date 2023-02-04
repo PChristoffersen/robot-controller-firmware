@@ -172,10 +172,7 @@ class Brightness(_ControllerStructure):
     def set(self, brightness):
         self.brightness = brightness
     def set_from_string(self, b: str):
-        if b.startswith('0x'):
-            self.brightness = _clamp(int(b, 16), 0, 0xFFFF)
-        else:
-            self.brightness = _clamp(int(b), 0, 0xFFFF)
+        self.brightness = _clamp(int(b, 16), 0, 0xFFFF)
     def __str__(self):
         return f"<{self.brightness:04x}>"
     def __repr__(self):

@@ -30,7 +30,7 @@ namespace Feature {
 
             void update();
 
-            void set_ano(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_BUTTON_FIRST, INPUT_BUTTON_MASK); }
+            void set_ano(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_ANO_FIRST, INPUT_ANO_MASK); }
             void set_usb_leds(uint8 input)   { set_inputs(static_cast<input_type>(input)<<INPUT_USB_LED_FIRST, INPUT_USB_LED_MASK); }
             void set_buttons(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_BUTTON_FIRST, INPUT_BUTTON_MASK); }
 

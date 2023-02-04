@@ -123,7 +123,7 @@ bool Engine::load_brightness_lut(ConfigStore &store)
 
 void Engine::set_inputs(uint32 values, uint32 mask)
 {
-    input_type value = (m_inputs & ~mask) | values;
+    input_type value = (m_inputs & ~mask) | (values & mask);
     m_input_dirty = (value != m_inputs);
     m_inputs = value;
 }

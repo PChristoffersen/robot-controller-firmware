@@ -153,7 +153,7 @@ def main():
                         val = Input.from_string(val).value
                     setattr(slot, field, val)
                 controller.update_output_configs()
-                print_output_configs([config], offset=output.value)
+                #print_output_configs([config], offset=output.value)
 
 
         elif args.command == 'mode':
@@ -166,7 +166,7 @@ def main():
                     if val is not None:
                         setattr(config, field, val)
                 controller.update_mode_configs()
-                print_mode_configs(controller.mode_configs)
+                #print_mode_configs(controller.mode_configs)
 
 
         elif args.command == 'color':
@@ -177,7 +177,7 @@ def main():
                 for i,b in enumerate(args.values):
                     lut[args.offset+i].set_from_string(b)
                 controller.update_color_lut()
-                print_color(controller.color_lut)
+                #print_color(controller.color_lut)
 
         elif args.command == 'brightness':
             if args.action == 'list':
@@ -187,7 +187,7 @@ def main():
                 for i,b in enumerate(args.values):
                     lut[args.offset+i].set_from_string(b)
                 controller.update_brightness_lut()
-                print_brightness(controller.brightness_lut)
+                #print_brightness(controller.brightness_lut)
 
 
 if __name__ == '__main__':

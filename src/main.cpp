@@ -258,6 +258,7 @@ static void update_ano()
     static int last_pos = 0;
     static bool last_select = false;
     static auto last_hat = HIDDevice::HAT_NONE;
+    static uint8 last_sw_bits = 0x00;
 
     auto pos = g_ano_dial.get_pos();
     if (pos!=last_pos) {
@@ -268,7 +269,19 @@ static void update_ano()
         g_hid_device.set_dial(0);
     }
 
-    bool select = g_ano_dial.get_switch(AnoDial::SW_CENTER);
+    bool sw[AnoDial::N_SWITCHES];
+    uint8 sw_bits = 0x00;
+    for (size_t i=0; i<AnoDial::N_SWITCHES; i++) {
+        sw[i] = g_ano_dial.get_switch(static_cast<AnoDial::Switch>(i));
+        sw_bits |= (sw[i]?1:0)<<i;
+    }
+    if (sw_bits==last_sw_bits) {
+        return;
+    }
+    last_sw_bits = sw_bits;
+    g_feature_engine.set_ano(sw_bits);
+
+    bool select = sw[AnoDial::SW_CENTER];
     if (select != last_select) {
         constexpr uint16 mask { 1<<ANO_BUTTON_START };
         #if 0
@@ -279,10 +292,10 @@ static void update_ano()
         last_select = select;
     }
 
-    uint8 st = (g_ano_dial.get_switch(AnoDial::SW_UP)?1:0)<<0;
-    st |= (g_ano_dial.get_switch(AnoDial::SW_DOWN)?1:0)<<1;
-    st |= (g_ano_dial.get_switch(AnoDial::SW_LEFT)?1:0)<<2;
-    st |= (g_ano_dial.get_switch(AnoDial::SW_RIGHT)?1:0)<<3;
+    uint8 st = (sw[AnoDial::SW_UP]?1:0)<<0;
+    st |= (sw[AnoDial::SW_DOWN]?1:0)<<1;
+    st |= (sw[AnoDial::SW_LEFT]?1:0)<<2;
+    st |= (sw[AnoDial::SW_RIGHT]?1:0)<<3;
     HIDDevice::hat_position hat = HIDDevice::HAT_NONE;
     switch (st) {
         case 0b0101:

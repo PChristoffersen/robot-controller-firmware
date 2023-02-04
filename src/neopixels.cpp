@@ -142,8 +142,11 @@ void Neopixels::begin()
     dma_set_priority(ws2812_dma, WS2812_DMA_CH, DMA_PRIORITY_VERY_HIGH);
     dma_attach_interrupt(ws2812_dma, WS2812_DMA_CH, ws2812_dma_isr);
 
+    delay(10);
     show();
+    delay(10);
     show();
+    delay(10);
 }
 
 

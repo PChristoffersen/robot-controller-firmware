@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#define ENABLE_WATCHDOG 0
+#define ENABLE_WATCHDOG 1
 #define ENABLE_DEBUG 1
 
 #define Console Serial1
