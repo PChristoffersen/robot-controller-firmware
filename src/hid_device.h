@@ -53,7 +53,8 @@ class HIDDevice : public HIDReporter {
         static constexpr size_t FEATURE_COUNT { static_cast<size_t>(_FEATURE_COUNT) };
 
         typedef struct {
-            uint8 leds;
+            uint8 leds: 5;
+            uint8 _padding: 3;
         } __packed OutputReport;
         static constexpr uint8 OUTPUT_BUFFER_SIZE { sizeof(OutputReport) };
 
@@ -89,11 +90,10 @@ class HIDDevice : public HIDReporter {
         void setAxis(axis_type axis, axis_value value) 
         { 
             m_report.axis[axis] = value; 
-            //m_report_pending = true;
         }
         void set_dial(int value) 
         { 
-            value = clamp_value(value, -7, 7); 
+            value = clamp_value(m_report.dial+value, -7, 7); 
             m_report_pending = (value!=0) && (value!=m_report.dial);
             m_report.dial = value;
         }
@@ -105,7 +105,7 @@ class HIDDevice : public HIDReporter {
         void set_buttons(button_value buttons, button_value mask)
         { 
             button_value value = (m_report.buttons & ~mask) | buttons;
-            m_report_pending = (value!=m_report.buttons);
+            m_report_pending = (value!=m_report.buttons); 
             m_report.buttons = value;
         }
 
@@ -116,6 +116,7 @@ class HIDDevice : public HIDReporter {
         { 
             sendReport(); 
             m_report_pending = false; 
+            m_report.dial = 0;
         }
 
         static const uint8 *descriptor();

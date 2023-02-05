@@ -265,9 +265,6 @@ static void update_ano()
         g_hid_device.set_dial(pos-last_pos);
         last_pos = pos;
     }
-    else {
-        g_hid_device.set_dial(0);
-    }
 
     bool sw[AnoDial::N_SWITCHES];
     uint8 sw_bits = 0x00;
@@ -453,13 +450,19 @@ static void update_analog_input()
         for (size_t i=0; i<g_analog_input.count(); i++) {
             auto val = g_analog_input.get(i);
             if (val!=last_values[i]) {
-                changed |= std::abs(last_values[i]-val)>AXIS_CHANGE_THRESHOLD;
+                bool ch = std::abs(last_values[i]-val)>AXIS_CHANGE_THRESHOLD;
                 g_hid_device.setAxis(static_cast<HIDDevice::axis_type>(i), val);
-                last_values[i] = val;
+                if (ch) {
+                    changed = true;
+                    last_values[i] = val;
+                }
             }
         }
 
         last_count = count;
+    }
+    if (changed) {
+        g_hid_device.set_report_pending();
     }
 }
 
@@ -473,15 +476,22 @@ static void update_usb_features()
         uint16 res;
         HIDDevice::OutputReport output;
         if ( (res=g_hid_device.read_output(output)) ) {
+            uint8 leds = output.leds;
+            #if 0
             DebugPrint("Output: ");
             DebugPrint(res);
+            DebugPrint(" ");
+            DebugPrint(output.leds);
+            DebugPrint(" ");
+            DebugPrint(leds, BIN);
             DebugPrint(" |");
-            for (size_t i=0; i<sizeof(output.leds); i++) {
-                DebugPrint((output.leds&(1<<i))?"1":"_");
+            for (size_t i=0; i<5; i++) {
+                DebugPrint((leds&(1<<i))?"1":"_");
             }
             DebugPrint("|");
             DebugPrintLn();
-            g_feature_engine.set_usb_leds(output.leds);
+            #endif
+            g_feature_engine.set_usb_leds(leds);
         }
 
         Feature::Command command;

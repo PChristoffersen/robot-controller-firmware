@@ -14,9 +14,9 @@ class AnoDial {
             N_SWITCHES,
         };
         static constexpr Switch SW_CENTER { Switch::SW_1 };
-        static constexpr Switch SW_DOWN   { Switch::SW_2 };
+        static constexpr Switch SW_UP     { Switch::SW_2 };
         static constexpr Switch SW_RIGHT  { Switch::SW_3 };
-        static constexpr Switch SW_UP     { Switch::SW_4 };
+        static constexpr Switch SW_DOWN   { Switch::SW_4 };
         static constexpr Switch SW_LEFT   { Switch::SW_5 };
 
         AnoDial();

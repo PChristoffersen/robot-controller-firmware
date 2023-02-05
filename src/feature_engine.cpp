@@ -45,7 +45,7 @@ void Engine::begin(ConfigStore &store)
 void Engine::default_output_configs()
 {
     for (auto &config : m_output_configs) {
-        for (auto entry : config) {
+        for (auto &entry : config) {
             entry = OutputConfigEntry();
         }
     }
