@@ -14,7 +14,7 @@ Robot controller for use with [ROS](https://www.ros.org/)
 - 4x [Sparkfun LED Tactile Button](https://www.sparkfun.com/products/10439)
 - 4x [Sparkfun LED Tactile Button Breakout](https://www.sparkfun.com/products/10467)
 - 4x 12mm Tactile Push button
-- 4x [Adafruit RGB Smark NeoPixel](https://www.adafruit.com/product/1558)
+- 4x [Adafruit RGB Smart NeoPixel](https://www.adafruit.com/product/1558)
 
 # Schematic 
 
