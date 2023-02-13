@@ -43,7 +43,7 @@ class _ControllerIntFlag(IntFlag):
 class _ControllerIntEnum(IntEnum):
     @classmethod
     def list(cls):
-        return list(map(lambda c: c.name.lower(), cls))
+        return list(map(lambda c: c.lower(), cls.__members__))
     @classmethod
     def from_string(cls, s: str):
         return cls[s.upper()]
@@ -220,11 +220,11 @@ class Input(_ControllerIntEnum):
     BUTTON6          = auto()
     BUTTON7          = auto()
     BUTTON8          = auto()
-    USB_LED_STANDBY  = auto()
-    USB_LED_SUSPEND  = auto()
-    USB_LED_CHARGING = auto()
-    USB_LED_MESSAGE  = auto()
-    USB_LED_GENERIC  = auto()
+    USB_LED1         = auto()
+    USB_LED2         = auto()
+    USB_LED3         = auto()
+    USB_LED4         = auto()
+    USB_LED5         = auto()
     SOFT1            = auto()
     SOFT2            = auto()
     SOFT3            = auto()
@@ -235,6 +235,24 @@ class Input(_ControllerIntEnum):
     SOFT8            = auto()
     SOFT9            = auto()
     SOFT10           = auto()
+    BUTTON_POWER     = BUTTON1
+    BUTTON_TOP1      = BUTTON2
+    BUTTON_TOP2      = BUTTON3
+    BUTTON_TOP3      = BUTTON4
+    BUTTON_RIGHT1    = BUTTON5
+    BUTTON_RIGHT2    = BUTTON6
+    BUTTON_RIGHT3    = BUTTON7
+    BUTTON_RIGHT4    = BUTTON8
+    USB_LED_STANDBY  = USB_LED1
+    USB_LED_SUSPEND  = USB_LED2
+    USB_LED_CHARGING = USB_LED3
+    USB_LED_MESSAGE  = USB_LED4
+    USB_LED_GENERIC  = USB_LED5
+    ANO_SELECT       = ANO_SW1
+    ANO_UP           = ANO_SW2
+    ANO_DOWN         = ANO_SW4
+    ANO_LEFT         = ANO_SW5
+    ANO_RIGHT        = ANO_SW3
 
 
 class Output(_ControllerIntEnum):
@@ -248,6 +266,10 @@ class Output(_ControllerIntEnum):
     NEOPIXEL2   = auto()
     NEOPIXEL3   = auto()
     NEOPIXEL4   = auto()
+    LED_POWER   = LED1
+    LED_TOP1    = LED2
+    LED_TOP2    = LED3
+    LED_TOP3    = LED4
 
 
 class Mode(_ControllerIntEnum):

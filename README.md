@@ -16,6 +16,10 @@ Robot controller for use with [ROS](https://www.ros.org/)
 - 4x 12mm Tactile Push button
 - 4x [Adafruit RGB Smart NeoPixel](https://www.adafruit.com/product/1558)
 
+# 3d Model
+
+See [model](doc/model/)
+
 # Schematic 
 
 See documentation [schematic](doc/Schematic.pdf)
