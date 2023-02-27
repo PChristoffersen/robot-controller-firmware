@@ -21,8 +21,16 @@
 
 
 
-static constexpr uint32 MIN_HID_REPORT_INTERVAL { 25 };
-static constexpr uint32 MIN_HID_FEATURE_INTERVAL { 50 };
+static constexpr uint32 HID_MIN_REPORT_INTERVAL { 25 };
+static constexpr uint32 HID_MIN_FEATURE_INTERVAL { 50 };
+static constexpr uint32 HID_READY_GRACE_PERIOD { 3000 };
+static constexpr uint32 HID_HOST_READY_TIMEOUT { 3000 };
+
+static constexpr uint32 ONBOARD_LED_ONLINE_ON_TIME { 500 };
+static constexpr uint32 ONBOARD_LED_ONLINE_OFF_TIME { 500 };
+static constexpr uint32 ONBOARD_LED_OFFLINE_ON_TIME { 200 };
+static constexpr uint32 ONBOARD_LED_OFFLINE_OFF_TIME { 2000 };
+
 static USBHID HID;
 static HIDDevice g_hid_device(HID);
 
@@ -36,9 +44,10 @@ static AnalogInput      g_analog_input;
 static Feature::Engine  g_feature_engine { g_leds, g_neopixels, g_external_io };
 
 
+static bool g_host_ready = false;
+
 static constexpr uint8 ANO_BUTTON_START { 0 };
 static constexpr uint8 BUTTON_START { 1 };
-
 
 /* ------------------------------------------------------------------
  * Setup
@@ -92,10 +101,6 @@ void setup()
     g_buttons.begin();
     Console.println("[done]");
 
-    Console.print("External IO init    ");
-    g_external_io.begin();
-    Console.println("[done]");
-
     Console.print("Analog input init   ");
     g_analog_input.begin();
     Console.println("[done]");
@@ -103,6 +108,11 @@ void setup()
     Console.print("Feature engine init ");
     g_feature_engine.begin(g_config_store);
     Console.println("[done]");
+
+    Console.print("External IO init    ");
+    g_external_io.begin();
+    Console.println("[done]");
+
 
     Console.print("USB init            ");
     USBComposite.setManufacturerString(USB_MANUFACTURER_STRING);
@@ -229,6 +239,24 @@ static void process_command(Feature::Command &command)
 }
 
 
+
+/* ------------------------------------------------------------------
+ * Misc
+ * ------------------------------------------------------------------ */
+
+
+static void set_host_ready(bool ready) 
+{
+    g_host_ready = ready;
+    if (ready) {
+        Debug.println("Host is ready");
+    }
+    else {
+        Debug.println("Host offline");
+        // Load stored config
+        command_config_load(Feature::CONFIG_LOAD_STORE_ALL);
+    }
+}
 
 
 /* ------------------------------------------------------------------
@@ -418,16 +446,16 @@ static void update_external()
     }
     #endif
 
-
     if (in1!=in1_state || in2!=in2_state) {
+        g_feature_engine.set_ext_in(in1 | (in2<<1));
+
+        #if 0
         Debug.print(now);
         Debug.print(" EXTIN: ");
         Debug.print(in1?"1":"_");
         Debug.print(in2?"1":"_");
         Debug.println();
-
-        g_leds.set(Leds::LED_1, in1?0xFFFF:0x0000);
-        g_leds.set(Leds::LED_2, in2?0xFFFF:0x0000);
+        #endif
 
         in1_state = in1;
         in2_state = in2;
@@ -472,7 +500,7 @@ static void update_usb_features()
     static unsigned long last = 0;
     auto now = millis();
 
-    if ((now-last)>MIN_HID_FEATURE_INTERVAL) {
+    if ((now-last)>HID_MIN_FEATURE_INTERVAL) {
         uint16 res;
         HIDDevice::OutputReport output;
         if ( (res=g_hid_device.read_output(output)) ) {
@@ -559,12 +587,34 @@ static void print_report()
 static void update_usb()
 {
     static unsigned long last = 0;
+    static unsigned long last_ready = 0;
+    static unsigned long offline_time = 0;
+    static bool offline = true;
     auto now = millis();
 
-    if ((now-last)<MIN_HID_REPORT_INTERVAL)
+    if ((now-last)<HID_MIN_REPORT_INTERVAL)
         return;
 
-    if (g_hid_device.is_report_pending()) {
+    if (USBComposite.isReady()) {
+        offline_time = 0;
+        if (offline) {
+            last_ready = now;
+            set_host_ready(true);
+            offline = false;
+        }
+    }
+    else {
+        if (offline_time == 0) {
+            offline_time = now;
+        }
+        if (!offline && (now-offline_time)>HID_HOST_READY_TIMEOUT) {
+            set_host_ready(false);
+            offline = true;
+        }
+        return;
+    }
+
+    if (g_hid_device.is_report_pending() && (now-last_ready)>HID_READY_GRACE_PERIOD) {
         print_report();
         g_hid_device.send_report();
         last = now;
@@ -583,12 +633,21 @@ static void update_features()
 static void update_builtin_led()
 {
     static uint32 last = 0;
+    static uint32 next_interval = ONBOARD_LED_OFFLINE_OFF_TIME;
     static bool state = true;
     auto now = millis();
 
-    if ((now-last)>500) {
+    if ((now-last)>next_interval) {
         state = !state;
         digitalWrite(LED_BUILTIN, state?HIGH:LOW);
+
+        if (g_host_ready) {
+            next_interval = state?ONBOARD_LED_ONLINE_OFF_TIME:ONBOARD_LED_ONLINE_ON_TIME;
+        }
+        else {
+            next_interval = state?ONBOARD_LED_OFFLINE_OFF_TIME:ONBOARD_LED_OFFLINE_ON_TIME;
+        }
+
         last = now;
     }
 }

@@ -53,10 +53,10 @@ $SEND_CMD output set neopixel2 0 --enable ano_sw1  --active true --active_mode 1
 $SEND_CMD output set neopixel3 0 --enable ano_sw1  --active true --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
 $SEND_CMD output set neopixel4 0 --enable ano_sw1  --active true --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
 
-#$SEND_CMD output set neopixel1 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 2 --secondary_lut 0
-#$SEND_CMD output set neopixel2 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 3 --secondary_lut 0
-#$SEND_CMD output set neopixel3 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 4 --secondary_lut 0
-#$SEND_CMD output set neopixel4 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 5 --secondary_lut 0
+$SEND_CMD output set neopixel1 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 2 --secondary_lut 0
+$SEND_CMD output set neopixel2 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 3 --secondary_lut 0
+$SEND_CMD output set neopixel3 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 4 --secondary_lut 0
+$SEND_CMD output set neopixel4 1 --enable true     --active true --active_mode 1 --passive_mode 0 --primary_lut 5 --secondary_lut 0
 
 #$SEND_CMD output set neopixel1 1 --enable true    --active button1 --active_mode 1 --passive_mode 0 --primary_lut 5 --secondary_lut 6
 #$SEND_CMD output set neopixel2 1 --enable true    --active button5 --active_mode 5 --passive_mode 0 --primary_lut 2 --secondary_lut 6

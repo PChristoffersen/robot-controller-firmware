@@ -33,6 +33,8 @@ namespace Feature {
             void set_ano(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_ANO_FIRST, INPUT_ANO_MASK); }
             void set_usb_leds(uint8 input)   { set_inputs(static_cast<input_type>(input)<<INPUT_USB_LED_FIRST, INPUT_USB_LED_MASK); }
             void set_buttons(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_BUTTON_FIRST, INPUT_BUTTON_MASK); }
+            void set_ext_in(uint8 input) { set_inputs(static_cast<input_type>(input)<<INPUT_EXT_FIRST, INPUT_EXT_MASK); }
+            void set_host_ready(bool ready) { set_inputs(static_cast<input_type>(ready)<<INPUT_HOST_READY_FIRST, INPUT_HOST_READY_MASK); }
 
             SoftInput &soft_input() { return m_soft_input; }
             void dirty_soft_input() { m_soft_input_dirty = true; set_inputs(static_cast<input_type>(m_soft_input.input)<<INPUT_SOFT_FIRST, INPUT_SOFT_MASK); }

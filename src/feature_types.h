@@ -36,8 +36,8 @@ namespace Feature {
         SOFT6,
         SOFT7,
         SOFT8,
-        SOFT9,
-        SOFT10,
+        HOST_READY,
+        _RESERVED1,
         _COUNT
     };
     static_assert(static_cast<uint8>(Input::_COUNT)==32);
@@ -61,9 +61,11 @@ namespace Feature {
     static constexpr uint8  INPUT_USB_LED_COUNT    { INPUT_USB_LED_LAST-INPUT_USB_LED_FIRST+1 };
     static constexpr uint32 INPUT_USB_LED_MASK     { ((1ul<<INPUT_USB_LED_COUNT)-1)<<INPUT_USB_LED_FIRST };
     static constexpr uint8  INPUT_SOFT_FIRST       { static_cast<uint8>(Input::SOFT1) };
-    static constexpr uint8  INPUT_SOFT_LAST        { static_cast<uint8>(Input::SOFT10) };
+    static constexpr uint8  INPUT_SOFT_LAST        { static_cast<uint8>(Input::SOFT8) };
     static constexpr uint8  INPUT_SOFT_COUNT       { INPUT_SOFT_LAST-INPUT_SOFT_FIRST+1 };
     static constexpr uint32 INPUT_SOFT_MASK        { ((1ul<<INPUT_SOFT_COUNT)-1)<<INPUT_SOFT_FIRST };
+    static constexpr uint8  INPUT_HOST_READY_FIRST { static_cast<uint8>(Input::HOST_READY) };
+    static constexpr uint32 INPUT_HOST_READY_MASK  { 1ul<<INPUT_HOST_READY_FIRST };
     static_assert(INPUT_EXT_COUNT==::EXT_IN_COUNT);
 
 
@@ -77,6 +79,7 @@ namespace Feature {
     static constexpr uint32 CONFIG_LOAD_STORE_ARG_MODE_CONFIGS   { 1<<1 };
     static constexpr uint32 CONFIG_LOAD_STORE_ARG_COLOR_LUT      { 1<<2 };
     static constexpr uint32 CONFIG_LOAD_STORE_ARG_BRIGHTNESS_LUT { 1<<3 };
+    static constexpr uint32 CONFIG_LOAD_STORE_ALL { CONFIG_LOAD_STORE_ARG_OUTPUT_CONFIGS | CONFIG_LOAD_STORE_ARG_MODE_CONFIGS | CONFIG_LOAD_STORE_ARG_COLOR_LUT | CONFIG_LOAD_STORE_ARG_BRIGHTNESS_LUT };
 
     using command_arg = uint32;
     struct __packed Command {
@@ -88,13 +91,13 @@ namespace Feature {
     static constexpr Command COMMAND_NOOP {};
 
 
-    using soft_input_type = uint16;
+    using soft_input_type = uint8;
     static_assert(sizeof(soft_input_type)*8>=INPUT_SOFT_COUNT);
     struct __packed SoftInput {
         soft_input_type input : INPUT_SOFT_COUNT;
-        soft_input_type _pack1 : (8*sizeof(soft_input_type)-INPUT_SOFT_COUNT);
+        //soft_input_type _pack1 : (8*sizeof(soft_input_type)-INPUT_SOFT_COUNT);
         SoftInput() :
-            input { 0x0000 }
+            input { 0x00 }
         {}
     };
     static constexpr size_t SOFT_INPUT_SIZE { sizeof(SoftInput) };

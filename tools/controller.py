@@ -59,8 +59,8 @@ class _ControllerIntEnum(IntEnum):
 class SoftInputState(_ControllerStructure):
     _pack_ = 1
     _fields_ = [
-        ('input',  ctypes.c_uint16, 10),
-        ('_pack1', ctypes.c_uint16, 6),
+        ('input',  ctypes.c_uint8, 8),
+        #('_pack1', ctypes.c_uint16, 6),
     ]
 
 class SoftInput(_ControllerIntFlag):
@@ -72,8 +72,6 @@ class SoftInput(_ControllerIntFlag):
     IN6 = auto()
     IN7 = auto()
     IN8 = auto()
-    IN9 = auto()
-    IN10 = auto()
 
 
 class ModeConfig(_ControllerStructure):
@@ -233,8 +231,7 @@ class Input(_ControllerIntEnum):
     SOFT6            = auto()
     SOFT7            = auto()
     SOFT8            = auto()
-    SOFT9            = auto()
-    SOFT10           = auto()
+    HOST_READY       = auto()
     BUTTON_POWER     = BUTTON1
     BUTTON_TOP1      = BUTTON2
     BUTTON_TOP2      = BUTTON3

@@ -6,7 +6,7 @@
 
 void watchdog_init()
 {
-    iwdg_init(IWDG_PRE_16, 0xFFF);
+    iwdg_init(IWDG_PRE_32, 0xFFF);
 }
 
 
