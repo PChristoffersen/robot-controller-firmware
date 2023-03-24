@@ -203,7 +203,17 @@ bool ConfigStore::_load(uint16 off, flash_value *data, uint16 size)
 
     for (uint16 i=0; i<size; i++) {
         res = EEPROM.read(off+i, &value);
-        if (res != EEPROM_OK) {
+        if (res == EEPROM_BAD_ADDRESS) {
+            #if 0
+            Debug.print("Addr ");
+            Debug.print(off+i);
+            Debug.print(" ");
+            Debug.print(res);
+            Debug.println(" bad-add");
+            #endif
+            data[i] = 0xFFFF;
+        }
+        else if (res != EEPROM_OK) {
             #if 0
             Debug.print("Addr ");
             Debug.print(off+i);
@@ -213,7 +223,16 @@ bool ConfigStore::_load(uint16 off, flash_value *data, uint16 size)
             #endif
             return false;
         }
-        data[i] = value;
+        else {
+            #if 0
+            Debug.print("Addr ");
+            Debug.print(off+i);
+            Debug.print(" ");
+            Debug.print(res);
+            Debug.println(" ok");
+            #endif
+            data[i] = value;
+        }
         crc.update(value);
     }
     uint32 checksum = crc.finalize();
@@ -242,6 +261,15 @@ bool ConfigStore::_store(uint16 off, flash_value *data, uint16 size)
             Debug.println(" fail");
             #endif
             return false;
+        }
+        else {
+            #if 0
+            Debug.print("Addr ");
+            Debug.print(off+i);
+            Debug.print(" ");
+            Debug.print(res);
+            Debug.println(" ok");
+            #endif
         }
     }
     CRC32 crc;

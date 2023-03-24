@@ -170,9 +170,9 @@ AnalogInput::AnalogInput() :
 {
     for (size_t i=0; i<AXIS_COUNT; i++) {
         for (size_t j=0; j<ADC_DATA_AVG_COUNT; j++) {
-            m_adc_data[i][j] = AXIS_CENTER;
+            m_adc_data[i][j] = ADC_AXIS_CENTER;
         }
-        m_adc_data_total[i] = ADC_DATA_AVG_COUNT*AXIS_CENTER;
+        m_adc_data_total[i] = ADC_DATA_AVG_COUNT*ADC_AXIS_CENTER;
     }
 }
 
@@ -229,8 +229,8 @@ AnalogInput::axis_value AnalogInput::get(size_t idx) const
     noInterrupts();
     auto data = m_adc_data_total[idx];
     interrupts();
-    int32 val = static_cast<int32>(data/ADC_DATA_AVG_COUNT)-AXIS_CENTER;
-    return clamp_value<int32>(val*std::numeric_limits<int16>::max()/AXIS_MAX, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max());
+    int32 val = static_cast<int32>(data/ADC_DATA_AVG_COUNT)-ADC_AXIS_CENTER;
+    return clamp_value<int32>(val*std::numeric_limits<int16>::max()/ADC_AXIS_MAX, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max());
 }
 
 

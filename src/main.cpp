@@ -23,7 +23,7 @@
 
 static constexpr uint32 HID_MIN_REPORT_INTERVAL { 25 };
 static constexpr uint32 HID_MIN_FEATURE_INTERVAL { 50 };
-static constexpr uint32 HID_READY_GRACE_PERIOD { 3000 };
+static constexpr uint32 HID_READY_GRACE_PERIOD { 5000 };
 static constexpr uint32 HID_HOST_READY_TIMEOUT { 3000 };
 
 static constexpr uint32 ONBOARD_LED_ONLINE_ON_TIME { 500 };
@@ -248,6 +248,7 @@ static void process_command(Feature::Command &command)
 static void set_host_ready(bool ready) 
 {
     g_host_ready = ready;
+    g_feature_engine.set_host_ready(ready);
     if (ready) {
         Debug.println("Host is ready");
     }
@@ -468,7 +469,8 @@ static void update_external()
 
 static void update_analog_input()
 {
-    static constexpr AnalogInput::axis_value AXIS_CHANGE_THRESHOLD { 8 };
+    static constexpr AnalogInput::axis_value AXIS_CHANGE_THRESHOLD { 64 };
+    static constexpr AnalogInput::axis_value AXIS_DEADZONE { 2000 };
     static uint32 last_count = 0;
     static AnalogInput::axis_value last_values[g_analog_input.count()];
     bool changed = false;
@@ -477,10 +479,24 @@ static void update_analog_input()
     if (count!=last_count) {
         for (size_t i=0; i<g_analog_input.count(); i++) {
             auto val = g_analog_input.get(i);
+            if (std::abs(val)<AXIS_DEADZONE) {
+                val = AnalogInput::AXIS_CENTER;
+            }
             if (val!=last_values[i]) {
                 bool ch = std::abs(last_values[i]-val)>AXIS_CHANGE_THRESHOLD;
                 g_hid_device.setAxis(static_cast<HIDDevice::axis_type>(i), val);
                 if (ch) {
+                    #if 0
+                    Debug.print("Change[");
+                    Debug.print(i);
+                    Debug.print("]: ");
+                    Debug.print(std::abs(last_values[i]-val));
+                    Debug.print(" ");
+                    Debug.print(val);
+                    Debug.print(" ");
+                    Debug.print(last_values[i]);
+                    Debug.println();
+                    #endif
                     changed = true;
                     last_values[i] = val;
                 }
@@ -490,6 +506,15 @@ static void update_analog_input()
         last_count = count;
     }
     if (changed) {
+        #if 0
+        Debug.print("Change ");
+        for (size_t i=0; i<g_analog_input.count(); i++) {
+            auto val = g_analog_input.get(i);
+            Debug.print(" ");
+            Debug.print(val);
+        }
+        Debug.println();
+        #endif
         g_hid_device.set_report_pending();
     }
 }
