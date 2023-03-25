@@ -3,6 +3,8 @@
 Robot controller for use with [ROS](https://www.ros.org/) 
 
 ![Controller](doc/Controller.png)
+![Controller-Photo](doc/Controller-photo.jpg)
+![Controller-Photo](doc/Controller-photo2.jpg)
 
 # Hardware
 
