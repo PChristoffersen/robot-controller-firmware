@@ -6,6 +6,7 @@
 #include "leds.h"
 #include "neopixels.h"
 #include "external_io.h"
+#include "hid_device.h"
 #include "config_store.h"
 
 namespace Feature {
@@ -14,7 +15,7 @@ namespace Feature {
         public:
             using input_type = uint32;
 
-            Engine(Leds &leds, Neopixels &neopixels, ExternalIO &external_io);
+            Engine(Leds &leds, Neopixels &neopixels, ExternalIO &external_io, HIDDevice &hid_device);
 
             void begin(ConfigStore &store);
 
@@ -66,6 +67,7 @@ namespace Feature {
             Leds &m_leds;
             Neopixels &m_neopixels;
             ExternalIO &m_external_io;
+            HIDDevice &m_hid_device;
 
             OutputState m_outputs[OUTPUT_COUNT];
 
@@ -98,6 +100,7 @@ namespace Feature {
             void update_leds(uint32 now);
             void update_neopixels(uint32 now);
             void update_external(uint32 now);
+            void update_hid(uint32 now);
 
             inline brightness_type ramp_brightness(uint32 now, uint32 start, const ModeConfig &config, brightness_type primary, brightness_type secondary);
             inline color_type ramp_color(uint32 now, uint32 start, const ModeConfig &config, color_type primary, color_type secondary);

@@ -9,10 +9,11 @@ static const OutputConfigEntry DEFAULT_CONFIG;
 
 
 
-Engine::Engine(Leds &leds, Neopixels &neopixels, ExternalIO &external_io):
+Engine::Engine(Leds &leds, Neopixels &neopixels, ExternalIO &external_io, HIDDevice &hid_device):
     m_leds { leds },
     m_neopixels { neopixels },
     m_external_io { external_io },
+    m_hid_device { hid_device },
     m_animating { false },
     m_inputs { 1<<INPUT_TRUE },
     m_input_dirty { false }
@@ -273,6 +274,20 @@ void Engine::update_external(uint32 now)
 }
 
 
+void Engine::update_hid(uint32 now)
+{
+    HIDDevice::button_value buttons = 0;
+    for (size_t i=0; i<OUTPUT_HID_BUTTON_COUNT; i++) {
+        auto &entry = m_outputs[i+OUTPUT_HID_BUTTON_FIRST];
+        auto &config = *entry.config;
+        auto &mode = m_mode_configs[entry.active?config.active_mode:config.passive_mode];
+        auto brightness = ramp_brightness(now, entry.start_time, mode, m_brightness_lut[config.primary_lut], m_brightness_lut[config.secondary_lut]);
+        buttons |= ( (brightness>0) ? 0 : 1 ) << (i+HIDDevice::SOFT_BUTTON_START);
+    }
+    m_hid_device.set_buttons(buttons, HIDDevice::SOFT_BUTTON_MASK);
+}
+
+
 #define TIME_UPDATE 0
 
 void Engine::update()
@@ -303,6 +318,7 @@ void Engine::update()
         }
         if (dirty) {
             update_external(now);
+            update_hid(now);
         }
 
 

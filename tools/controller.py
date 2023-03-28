@@ -253,20 +253,23 @@ class Input(_ControllerIntEnum):
 
 
 class Output(_ControllerIntEnum):
-    EXT_OUT1    = 0
-    EXT_OUT2    = auto()
-    LED1        = auto()
-    LED2        = auto()
-    LED3        = auto()
-    LED4        = auto()
-    NEOPIXEL1   = auto()
-    NEOPIXEL2   = auto()
-    NEOPIXEL3   = auto()
-    NEOPIXEL4   = auto()
-    LED_POWER   = LED1
-    LED_TOP1    = LED2
-    LED_TOP2    = LED3
-    LED_TOP3    = LED4
+    EXT_OUT1        = 0
+    EXT_OUT2        = auto()
+    LED1            = auto()
+    LED2            = auto()
+    LED3            = auto()
+    LED4            = auto()
+    NEOPIXEL1       = auto()
+    NEOPIXEL2       = auto()
+    NEOPIXEL3       = auto()
+    NEOPIXEL4       = auto()
+    HID_BUTTON10   = auto()
+    HID_BUTTON11   = auto()
+    HID_BUTTON12   = auto()
+    LED_POWER       = LED1
+    LED_TOP1        = LED2
+    LED_TOP2        = LED3
+    LED_TOP3        = LED4
 
 
 class Mode(_ControllerIntEnum):

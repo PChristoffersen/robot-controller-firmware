@@ -113,6 +113,9 @@ namespace Feature {
         NEOPIXEL2,
         NEOPIXEL3,
         NEOPIXEL4,
+        HID_BUTTON_10,
+        HID_BUTTON_11,
+        HID_BUTTON_12,
         _COUNT
     };
     static constexpr size_t OUTPUT_COUNT           { static_cast<size_t>(Output::_COUNT) };
@@ -125,10 +128,13 @@ namespace Feature {
     static constexpr uint8 OUTPUT_NEOPIXEL_FIRST   { static_cast<uint8>(Output::NEOPIXEL1) };
     static constexpr uint8 OUTPUT_NEOPIXEL_LAST    { static_cast<uint8>(Output::NEOPIXEL4) };
     static constexpr uint8 OUTPUT_NEOPIXEL_COUNT   { OUTPUT_NEOPIXEL_LAST-OUTPUT_NEOPIXEL_FIRST+1 };
+    static constexpr uint8 OUTPUT_HID_BUTTON_FIRST { static_cast<uint8>(Output::HID_BUTTON_10) };
+    static constexpr uint8 OUTPUT_HID_BUTTON_LAST  { static_cast<uint8>(Output::HID_BUTTON_12) };
+    static constexpr uint8 OUTPUT_HID_BUTTON_COUNT { OUTPUT_HID_BUTTON_LAST-OUTPUT_HID_BUTTON_FIRST+1 };
+
     static_assert(OUTPUT_EXT_COUNT==::EXT_OUT_COUNT);
     static_assert(OUTPUT_LED_COUNT==::LED_COUNT);
     static_assert(OUTPUT_NEOPIXEL_COUNT==::NEOPIXEL_COUNT);
-
 
 
     struct __packed OutputConfigEntry {

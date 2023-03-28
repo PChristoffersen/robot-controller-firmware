@@ -41,13 +41,10 @@ static Buttons          g_buttons;
 static AnoDial          g_ano_dial;
 static ExternalIO       g_external_io;
 static AnalogInput      g_analog_input;
-static Feature::Engine  g_feature_engine { g_leds, g_neopixels, g_external_io };
+static Feature::Engine  g_feature_engine { g_leds, g_neopixels, g_external_io, g_hid_device };
 
 
 static bool g_host_ready = false;
-
-static constexpr uint8 ANO_BUTTON_START { 0 };
-static constexpr uint8 BUTTON_START { 1 };
 
 /* ------------------------------------------------------------------
  * Setup
@@ -309,12 +306,11 @@ static void update_ano()
 
     bool select = sw[AnoDial::SW_CENTER];
     if (select != last_select) {
-        constexpr uint16 mask { 1<<ANO_BUTTON_START };
         #if 0
         Debug.print("Select: ");
         Debug.println(select?"1":"_");
         #endif
-        g_hid_device.set_buttons(select?mask:0, mask);
+        g_hid_device.set_buttons(select?HIDDevice::ANO_BUTTON_MASK:0, HIDDevice::ANO_BUTTON_MASK);
         last_select = select;
     }
 
@@ -374,7 +370,6 @@ static void update_ano()
 static void update_buttons()
 {
     static constexpr uint32 MIN_UPDATE_INTERVAL { 10 };
-    constexpr uint16 MASK { 0b11111111<<BUTTON_START };
     static uint32 last = 0;
     static uint16 last_state;
     uint32 now = millis();    
@@ -392,7 +387,7 @@ static void update_buttons()
     }
     if (state!=last_state) {
         g_feature_engine.set_buttons(state);
-        g_hid_device.set_buttons(state<<BUTTON_START, MASK);
+        g_hid_device.set_buttons(state<<HIDDevice::BUTTON_START, HIDDevice::BUTTON_MASK);
         last_state = state;
     }
 }

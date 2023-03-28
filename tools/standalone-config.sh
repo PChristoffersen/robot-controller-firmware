@@ -20,24 +20,16 @@ $SEND_CMD mode list
 
 
 echo ""
-echo "Set power button"
-$SEND_CMD output set ext_out1 0 --enable false   --active false
-$SEND_CMD output set ext_out1 1 --enable false   --active false
-$SEND_CMD output set ext_out1 2 --enable false   --active false
-$SEND_CMD output set ext_out1 2 --enable button1 --active true    --active_mode 2 --passive_mode 0 --primary_lut 1 --secondary_lut 0
+echo "Set LED Defaults"
 $SEND_CMD output set ext_out1 3 --enable true    --active ext_in1    --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
-$SEND_CMD output set ext_out2 0 --enable false   --active false
-$SEND_CMD output set ext_out2 1 --enable false   --active false
-$SEND_CMD output set ext_out2 2 --enable false   --active false
-$SEND_CMD output set ext_out2 2 --enable button1 --active true    --active_mode 2 --passive_mode 0 --primary_lut 1 --secondary_lut 0
 $SEND_CMD output set ext_out2 3 --enable true    --active ext_in2    --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
 $SEND_CMD output set led1 0     --enable button1 --active true       --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
-$SEND_CMD output set led1 1     --enable ext_in1 --active host_ready --active_mode 1 --passive_mode 2 --primary_lut 1 --secondary_lut 0
-$SEND_CMD output set led1 2     --enable false   --active true       --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
-$SEND_CMD output set led1 3     --enable true    --active true       --active_mode 0 --passive_mode 0 --primary_lut 0 --secondary_lut 0
+$SEND_CMD output set led2 0     --enable button2 --active true       --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
+$SEND_CMD output set led3 0     --enable button3 --active true       --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
+$SEND_CMD output set led4 0     --enable button4 --active true       --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
 
 
 echo ""
-echo "Set activity led"
-# TODO
-$SEND_CMD output set led2 0     --enable true --active ext_in2       --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
+echo "Set extra buttons"
+$SEND_CMD output set hid_button10 --active true --enable ext_in1 --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0
+$SEND_CMD output set hid_button11 --active true --enable ext_in2 --active_mode 1 --passive_mode 0 --primary_lut 1 --secondary_lut 0

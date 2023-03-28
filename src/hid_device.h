@@ -14,7 +14,7 @@ class HIDDevice : public HIDReporter {
         using axis_value = int16;
         using button_value = uint16;
 
-        static constexpr uint8 BUTTON_COUNT { 9 };
+        static constexpr uint8 BUTTON_COUNT { 12 };
         static constexpr uint8 LED_COUNT { 5 };
 
         enum axis_type : uint8 {
@@ -37,6 +37,14 @@ class HIDDevice : public HIDReporter {
             HAT_UP_LEFT    = 0x07,
             HAT_NONE       = 0x0F,
         };
+
+        static constexpr button_value ANO_BUTTON_START  { 0 };
+        static constexpr button_value ANO_BUTTON_MASK   { 0b1 << ANO_BUTTON_START };
+        static constexpr button_value BUTTON_START      { 1 };
+        static constexpr button_value BUTTON_MASK       { 0b11111111 << BUTTON_START };
+        static constexpr button_value SOFT_BUTTON_START { 9 };
+        static constexpr button_value SOFT_BUTTON_MASK  { 0b111 << SOFT_BUTTON_START };
+
 
         static constexpr uint8 REPORT_ID { 1 };
 
