@@ -1,0 +1,113 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "West Build",
+            "type": "process",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "command": "west",
+            "args": [
+                "build",
+                "-p",
+                "auto"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "isBuildCommand": true
+        },
+        {
+            "label": "West Pristine Build",
+            "type": "process",
+            "group": {
+                "kind": "build"
+            },
+            "command": "west",
+            "args": [
+                "build",
+                "-p",
+                "always",
+                "application/"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "isBuildCommand": true
+        },
+        {
+            "label": "West Configurable Build",
+            "type": "process",
+            "group": {
+                "kind": "build"
+            },
+            "command": "west",
+            "args": [
+                "build",
+                "-p",
+                "${input:pristine}",
+                "application/"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "isBuildCommand": true
+        },
+        {
+            "label": "West Menuconfig",
+            "type": "shell",
+            "command": "west build -t menuconfig",
+            "problemMatcher": []
+        },
+        {
+            "label": "RAM Report",
+            "type": "shell",
+            "command": "west build -t ram_report",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "ROM Report",
+            "type": "shell",
+            "command": "west build -t rom_report",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Pucover",
+            "type": "shell",
+            "command": "west build -t pubcover"
+        },
+        {
+            "label": "West init",
+            "type": "shell",
+            "command": "west init -l application",
+            "problemMatcher": []
+        },
+        {
+            "label": "West update",
+            "type": "shell",
+            "command": "west update",
+            "problemMatcher": []
+        },
+    ],
+    "inputs": [
+		{
+			"id": "pristine",
+			"type": "pickString",
+			"description": "Choose when to run a pristine build",
+			"default": "auto",
+			"options": [
+				"auto",
+				"always",
+				"never"
+			]
+		}
+	]
+}

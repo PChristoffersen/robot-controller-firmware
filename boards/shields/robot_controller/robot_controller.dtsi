@@ -1,0 +1,345 @@
+/**
+ * BSD 3-Clause License
+ * 
+ * Copyright (c) 2025, Peter Christoffersen
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+ #include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <zephyr/dt-bindings/pwm/pwm.h>
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/led/led.h>
+
+/ {
+    i2c_buttons: i2c_buttons {
+        compatible = "gpio-keys";
+        status = "okay";
+        sw1 {
+            label = "Switch 1";
+            gpios = <&pcf8574 0 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_1>;
+        };
+        sw2 {
+            label = "Switch 2";
+            gpios = <&pcf8574 1 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_2>;
+        };
+        sw3 {
+            label = "Switch 3";
+            gpios = <&pcf8574 2 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_3>;
+        };
+        sw4 {
+            label = "Switch 4";
+            gpios = <&pcf8574 3 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_4>;
+        };
+        btn_x {
+            label = "Button Up";
+            gpios = <&pcf8574 4 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_NORTH>;
+        };
+        btn_y {
+            label = "Button Right";
+            gpios = <&pcf8574 5 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_EAST>;
+        };
+        btn_a {
+            label = "Button Down";
+            gpios = <&pcf8574 6 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_SOUTH>;
+        };
+        btn_b {
+            label = "Button Left";
+            gpios = <&pcf8574 7 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_WEST>;
+        };
+    };
+
+    ano_dial: ano_dial {
+        compatible = "gpio-qdec";
+        status = "okay";
+        gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>,
+                <&gpiob 3 GPIO_ACTIVE_HIGH>;
+        steps-per-period = <2>;
+        zephyr,axis = <INPUT_REL_DIAL>;
+        sample-time-us = <2000>;
+        idle-timeout-ms = <200>;
+    };
+
+    ano_buttons: ano_buttons {
+        compatible = "gpio-keys";
+        status = "okay";
+        polling-mode;
+
+        sw_ano1: sw_ano1 {
+            label = "ANO Select";
+            gpios = <&gpioa 8 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_SELECT>;
+        };
+        sw_ano2: sw_ano2 {
+            label = "ANO Up";
+            gpios = <&gpiob 15 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_DPAD_UP>;
+        };
+        sw_ano3: sw_ano3 {
+            label = "ANO Left";
+            gpios = <&gpiob 14 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_DPAD_LEFT>;
+        };
+        sw_ano4: sw_ano4 {
+            label = "ANO Down";
+            gpios = <&gpiob 13 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_DPAD_DOWN>;
+        };
+        sw_ano5: sw_ano5 {
+            label = "ANO Right";
+            gpios = <&gpiob 12 GPIO_ACTIVE_LOW>;
+            zephyr,code = <INPUT_BTN_DPAD_RIGHT>;
+        };
+    };
+
+    analog_axis {
+        compatible = "analog-axis";
+        status = "okay";
+        poll-period-ms = <20>;
+
+        #define ANALOG_AXIS_COMMON(axis_deadzone) \
+            in-min = <0>; \
+            in-max = <4095>; \
+            out-min = <(-2048)>; \
+            out-max = <2047>;
+
+        axis_z {
+            io-channels = <&adc1 0>;
+            zephyr,axis = <INPUT_ABS_RZ>;
+            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE_Z)
+        };
+        axis_x {
+            io-channels = <&adc1 1>;
+            zephyr,axis = <INPUT_ABS_X>;
+            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
+        };
+        axis_y {
+            io-channels = <&adc1 2>;
+            zephyr,axis = <INPUT_ABS_Y>;
+            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
+        };
+        axis_rz {
+            io-channels = <&adc1 3>;
+            zephyr,axis = <INPUT_ABS_Z>;
+            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE_Z)
+        };
+        axis_rx {
+            io-channels = <&adc1 4>;
+            zephyr,axis = <INPUT_ABS_RX>;
+            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
+        };
+        axis_ry {
+            io-channels = <&adc1 5>;
+            zephyr,axis = <INPUT_ABS_RY>;
+            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
+        };
+    };
+
+    gpio_leds: gpio_leds {
+        compatible = "gpio-leds";
+        status = "okay";
+    };
+    
+    pwm_leds: pwm_leds {
+		compatible = "pwm-leds";
+        status = "okay";
+
+        led1 {
+            pwms = <&pwm4 2 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            label = "LED1";
+        };
+        led2 {
+            pwms = <&pwm4 1 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            label = "LED2";
+        };
+        led3 {
+            pwms = <&pwm3 3 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            label = "LED3";
+        };
+        led4 {
+            pwms = <&pwm3 4 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            label = "LED4";
+        };
+    };
+    
+    led_strip: led_strip {
+        compatible = "worldsemi,ws2812-stm32";
+        status = "okay";
+
+        pwms = <&pwm2 1 PWM_NSEC(1250) 0>;
+
+        dmas = <&dma1 5 0>;
+        dma-names = "led-strip";
+        dma-buffer-size = <4>;
+
+        async;
+
+        chain-length = <16>;
+		color-mapping =	<
+            LED_COLOR_ID_GREEN
+            LED_COLOR_ID_RED
+            LED_COLOR_ID_BLUE>;
+    };
+
+
+};
+
+
+&pinctrl {
+    swj-cfg = "jtag-disable";
+};
+
+&usart2 {
+    status = "disabled";
+};
+
+
+&usart3 {
+    status = "disabled";
+};
+
+
+&i2c1 {
+    pinctrl-0 = < &i2c1_scl_remap1_pb8 &i2c1_sda_remap1_pb9 >;
+
+    pcf8574: pcf8574@38 {
+        compatible = "nxp,pcf857x";
+        status = "okay";
+		reg = <0x38>;
+		gpio-controller;
+		#gpio-cells = <2>;
+		ngpios = <8>;
+        int-gpios = <&gpioc 15 (GPIO_ACTIVE_LOW)>;
+    };
+};
+
+&i2c2 {
+    status = "disabled";
+};
+
+&spi1 {
+    status = "disabled";
+};
+
+&spi2 {
+    status = "disabled";
+};
+
+&dma1 {
+    status = "okay";
+};
+
+&timers1 {
+    status = "disabled";
+    pwm1 {
+        status = "disabled";
+    };
+};
+
+&timers2 {
+    status = "okay";
+
+    pwm2: pwm {
+        status = "okay";
+        pinctrl-0 = <&tim2_ch1_remap3_pwm_out_pa15>;
+		pinctrl-names = "default";
+    };
+};
+
+&timers3 {
+    status = "okay";
+	st,prescaler = <1000>;
+
+    pwm3: pwm {
+        status = "okay";
+        pinctrl-0 = <&tim3_ch3_pwm_out_pb0>, <&tim3_ch4_pwm_out_pb1>;
+		pinctrl-names = "default";
+    };
+};
+
+&timers4 {
+    status = "okay";
+	st,prescaler = <1000>;
+
+    pwm4: pwm {
+        status = "okay";
+        pinctrl-0 = <&tim4_ch1_pwm_out_pb6>, <&tim4_ch2_pwm_out_pb7>;
+		pinctrl-names = "default";
+    };
+};
+
+
+&adc1 {
+    status = "okay";
+    pinctrl-0 = <&adc1_in0_pa0>, <&adc1_in1_pa1>, <&adc1_in2_pa2>, <&adc1_in3_pa3>, <&adc1_in4_pa4>, <&adc1_in5_pa5>;
+	pinctrl-names = "default";
+
+    #address-cells = <1>;
+    #size-cells = <0>;
+    
+    dmas = <&dma1 1 (STM32_DMA_PERIPH_TO_MEMORY | STM32_DMA_PERIPH_16BITS | STM32_DMA_MEM_16BITS)>;
+    dma-names = "adc0-dma1";
+
+    #define ADC_CHANNEL_COMMON \
+        zephyr,gain = "ADC_GAIN_1"; \
+        zephyr,reference = "ADC_REF_INTERNAL"; \
+        zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_TICKS, 240)>; \
+        zephyr,resolution = <12>;
+
+
+    channel@0 {
+        reg = <0>;
+        ADC_CHANNEL_COMMON
+    };
+    channel@1 {
+        reg = <1>;
+        ADC_CHANNEL_COMMON
+    };
+    channel@2 {
+        reg = <2>;
+        ADC_CHANNEL_COMMON
+    };
+    channel@3 {
+        reg = <3>;
+        ADC_CHANNEL_COMMON
+    };
+    channel@4 {
+        reg = <4>;
+        ADC_CHANNEL_COMMON
+    };
+    channel@5 {
+        reg = <5>;
+        ADC_CHANNEL_COMMON
+    };
+};

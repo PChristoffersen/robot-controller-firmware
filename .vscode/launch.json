@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "STM32F1x CMSIS-DAP",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceRoot}",
+            "device": "stm32f1x",
+            "rtos": "Zephyr",
+            "executable": "${workspaceRoot}/build/zephyr/zephyr.elf",
+            "preLaunchTask": "West Build",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "board/stm32f103c8_blue_pill.cfg",
+            ],
+            "openOCDLaunchCommands": [
+                "set WORKAREASIZE 0x5000",
+                "$_TARGETNAME configure -event gdb-attach { reset halt }",
+                "$_TARGETNAME configure -event gdb-detach { resume }",
+            ],
+            //"showDevDebugOutput": "raw",
+            //"runToEntryPoint": "main",
+            "postRestartCommands": [
+                "break fault_handle",
+                "continue"
+            ]
+        },
+        {
+            "name": "STM32F1x STLink",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceRoot}",
+            "rtos": "Zephyr",
+            "executable": "${workspaceRoot}/build/zephyr/zephyr.elf",
+            "preLaunchTask": "West Build",
+            "configFiles": [
+                "interface/stlink-dap.cfg",
+                "board/stm32f103c8_blue_pill.cfg",
+            ],
+            "openOCDLaunchCommands": [
+                "set WORKAREASIZE 0x5000",
+                "$_TARGETNAME configure -event gdb-attach { reset halt }",
+                "$_TARGETNAME configure -event gdb-detach { resume }",
+            ],
+            //"showDevDebugOutput": "raw",
+            //"runToEntryPoint": "main",
+            //"postRestartCommands": [
+            //    "break fault_handle",
+            //    "continue"
+            //]
+        },
+  ]
+}

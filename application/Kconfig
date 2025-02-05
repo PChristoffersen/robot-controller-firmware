@@ -1,0 +1,46 @@
+# Copyright (c) 2025 Peter Christoffersen
+# SPDX-License-Identifier: BSD-Clause-3
+
+menu "Robot Controller options"
+
+config ROBOT_CONTROLLER_USBD_MANUFACTURER
+	string "USB device manufacturer string"
+	default "Unknown"
+	help
+	  USB device manufacturer string.
+
+config ROBOT_CONTROLLER_USBD_PRODUCT
+	string "USB device product string"
+	default "Robot Contoller"
+	help
+	  USB device product stringa.
+
+config ROBOT_CONTROLLER_USBD_VID
+    hex "USB device Vendor ID"
+    default 0x1209
+    help
+      USB device Vendor ID. (Default is the Vendor ID for pid.codes)
+
+config ROBOT_CONTROLLER_USBD_PID
+	hex "USB device Product ID"
+	default 0x0001
+	help
+	  USB device Product ID. (Default is pod.codes Test PID)
+
+config ROBOT_CONTROLLER_USBD_REMOTE_WAKEUP
+	bool "USB device Remote Wakeup attribute"
+    default y
+	help
+	  Set the Remote Wakeup attribute in the configuration.
+
+config ROBOT_CONTROLLER_USBD_MAX_POWER
+	int "USB device bMaxPower value"
+	default 125
+	range 0 250
+	help
+	  bMaxPower value in the configuration in 2 mA units.
+
+
+endmenu
+
+source "Kconfig.zephyr"

@@ -1,0 +1,31 @@
+# Copyright (c) 2025 Peter Christoffersen
+# SPDX-License-Identifier: BSD-Clause-3
+
+cmake_minimum_required(VERSION 3.20.0)
+
+# Set the board
+set(BOARD "stm32_min_dev@blue")
+
+# Set the shield
+set(SHIELD robot_controller_standalone)
+#set(SHIELD robot_controller_embedded)
+
+# Add boards directory to the search path
+set(BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+
+find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
+project(robot_controller)
+
+target_sources(app PRIVATE
+    src/main.c
+    src/hid_device.c
+    src/usb_device.c
+    src/lamp_array.c
+    src/lighting.c
+    src/util.c
+)
+
+target_include_directories(app PRIVATE
+    include
+)

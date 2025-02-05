@@ -1,33 +1,66 @@
-# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/cpp/.devcontainer/base.Dockerfile
+ARG ZEPHYR_BUILD_VERSION=v0.27.4
+ARG ZEPHYR_BUILD_IMAGE=zephyrprojectrtos/zephyr-build
+FROM ${ZEPHYR_BUILD_IMAGE}:${ZEPHYR_BUILD_VERSION} as base
 
-# [Choice] Debian / Ubuntu version (use Debian 11, Ubuntu 18.04/22.04 on local arm64/Apple Silicon): debian-11, debian-10, ubuntu-22.04, ubuntu-20.04, ubuntu-18.04
-ARG VARIANT="ubuntu-22.04"
-FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
+USER root
 
-RUN apt-get update \
-    && apt-get -qqy install \
-    bc \
-    sudo \
-    build-essential \
-    ca-certificates \
-    clang \
-    curl \
-    gcc \
-    git \
-    python3 \
-    python3-dev \
-    python3-distutils \
-    python3-pip \
-    python3-setuptools \
-    srecord \
-    udev \
-    xz-utils \
-    && apt-get autoremove -y \
-    && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*
+# Base utils
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
+        picocom \
+        usbutils \
+        psmisc \
+        lsof \
+        vim \
+        less \
+        udev \
+        gdb-multiarch \
+        dwarves \
+    && apt-get clean
 
-RUN curl -fLo /etc/udev/rules.d/99-platformio-udev.rules --create-dirs https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/system/99-platformio-udev.rules
+# Zephyr 
+#RUN pip3 install git+https://github.com/HBehrens/puncover
 
-USER $USERNAME
 
-RUN python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/develop/scripts/get-platformio.py)"
+# --------------------------------------------------------------
+# Install newer version of OpenOCD
+#
+
+RUN apt-get install -y libusb-1.0-0 libhidapi-hidraw0 libhidapi-libusb0 && apt-get clean
+
+FROM base AS openocd
+
+ARG OPENOCD_VERSION=v0.12.0
+
+RUN apt-get install -y libusb-1.0-0-dev libhidapi-dev
+
+WORKDIR /workdir
+RUN git clone --depth 1 --branch ${OPENOCD_VERSION} https://github.com/openocd-org/openocd.git  && cd openocd && ./bootstrap
+
+RUN cd openocd && \
+    ./configure --prefix /opt/toolchains/openocd && \
+    make -j 8
+
+RUN cd openocd && make install
+
+
+# --------------------------------------------------------------
+# Create runtime image
+#
+
+FROM base AS runtime
+
+# Copy from other images
+COPY --from=openocd /opt/toolchains/openocd /opt/toolchains/openocd
+
+# Modify the user
+RUN <<EOS
+usermod --shell /bin/bash user
+usermod -a -G dialout user
+usermod -a -G plugdev user
+usermod -a -G root user
+EOS
+
+
+# [Optional] Set the default user. Omit if you want to keep the default as root.
+#USER user

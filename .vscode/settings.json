@@ -1,7 +1,13 @@
 {
-    "files.associations": {
-        "chrono": "cpp",
-        "ratio": "cpp"
-    },
-    "ros.distro": "humble"
+    "cmake.configureOnOpen": false,
+    "devicetree.defaultBoard": "stm32_min_dev@blue",
+    "C_Cpp.default.compilerPath": "/opt/toolchains/zephyr-sdk-${env:ZSDK_VERSION}/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc",
+	"C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "cortex-debug.openocdPath.linux": "/opt/toolchains/openocd/bin/openocd",
+    //"cortex-debug.openocdPath.linux": "/opt/toolchains/zephyr-sdk-${env:ZSDK_VERSION}/sysroots/x86_64-pokysdk-linux/usr/bin/openocd",
+    "cortex-debug.armToolchainPrefix": "arm-zephyr-eabi",
+    "cortex-debug.armToolchainPath.linux": "/opt/toolchains/zephyr-sdk-${env:ZSDK_VERSION}/arm-zephyr-eabi/bin",
+    "cortex-debug.objdumpPath.linux": "/opt/toolchains/zephyr-sdk-${env:ZSDK_VERSION}/arm-zephyr-eabi/bin/arm-zephyr-eabi-objdump",
+    "terminal.integrated.scrollback": 2000,
+    "cortex-debug.variableUseNaturalFormat": false,
 }

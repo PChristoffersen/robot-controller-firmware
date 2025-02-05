@@ -1,0 +1,15 @@
+# Copyright (c) 2025 Peter Christoffersen
+# SPDX-License-Identifier: BSD-Clause-3
+
+config SHIELD_ROBOT_CONTROLLER_STANDALONE
+	def_bool $(shields_list_contains,robot_controller_standalone)
+
+config SHIELD_ROBOT_CONTROLLER_EMBEDDED
+	def_bool $(shields_list_contains,robot_controller_embedded)
+
+config SHIELD_ROBOT_CONTROLLER_INIT_PRIORITY
+	int "Init priority"
+	default 91
+	help
+	  Shield init
+

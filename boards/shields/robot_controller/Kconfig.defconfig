@@ -1,0 +1,27 @@
+# Copyright (c) 2025 Peter Christoffersen
+# SPDX-License-Identifier: BSD-Clause-3
+
+if SHIELD_ROBOT_CONTROLLER_STANDALONE || SHIELD_ROBOT_CONTROLLER_EMBEDDED
+
+config GPIO
+    default y
+
+config I2C
+    default y
+
+config PWM
+    default y
+
+config DMA
+    default y
+
+config ADC
+    default y
+
+config ADC_STM32_DMA
+    default y
+
+config LED
+    default y
+
+endif #  SHIELD_ROBOT_CONTROLLER_STANDALONE || SHIELD_ROBOT_CONTROLLER_EMBEDDED
