@@ -18,9 +18,6 @@ config DMA
 config ADC
     default y
 
-config ADC_STM32_DMA
-    default y
-
 config LED
     default y
 

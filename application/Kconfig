@@ -41,6 +41,12 @@ config ROBOT_CONTROLLER_USBD_MAX_POWER
 	  bMaxPower value in the configuration in 2 mA units.
 
 
+config ROBOT_CONTROLLER_MIN_INPUT_REPORT_INTERVAL_MS
+	int "Minimum input report interval in milliseconds"
+	default 16
+	help
+	  Minimum input report interval in milliseconds.
+
 endmenu
 
 source "Kconfig.zephyr"

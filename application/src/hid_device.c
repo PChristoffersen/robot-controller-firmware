@@ -30,6 +30,7 @@
  */
 
 #include "hid_device.h"
+#include <zephyr/version.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/usb/usb_device.h>
@@ -101,20 +102,13 @@ static const uint8_t hid_report_desc[] = {
             HID_USAGE(HID_USAGE_GAMEPAD_BUTTON_EAST),   // Right Pad
             HID_USAGE(HID_USAGE_GAMEPAD_BUTTON_NORTH),  // Right Pad
             HID_USAGE(HID_USAGE_GAMEPAD_BUTTON_WEST),   // Right Pad
-            #if CONFIG_SHIELD_ROBOT_CONTROLLER_STANDALONE
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_1),    // Center top button 1
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_2),    // Center top button 2
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_3),    // Center bottom button 1
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_4),    // Center bottom button 2
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_5),    // Toggle switch 1
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_6),    // Toggle switch 2
-            #elif CONFIG_SHIELD_ROBOT_CONTROLLER_EMBEDDED
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_1), // Top button 1
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_2), // Top button 2
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_3), // Top button 3
-                HID_USAGE(HID_USAGE_EXTRA_BUTTON_4), // Top button 4
-            #else
-                #error "Invalid controller variant"
+            HID_USAGE(CONTROLLER_BUTTON_1_USAGE),    // Center top button 1
+            HID_USAGE(CONTROLLER_BUTTON_2_USAGE),    // Center top button 2
+            HID_USAGE(CONTROLLER_BUTTON_3_USAGE),    // Center bottom button 1
+            HID_USAGE(CONTROLLER_BUTTON_4_USAGE),    // Center bottom button 2
+            #if CONTROLLER_BUTTON_COUNT >=11
+            HID_USAGE(CONTROLLER_BUTTON_5_USAGE),    // Toggle switch 1
+            HID_USAGE(CONTROLLER_BUTTON_6_USAGE),    // Toggle switch 2
             #endif
 	        HID_LOGICAL_MIN8(0),
 	        HID_LOGICAL_MAX8(1),
@@ -129,25 +123,16 @@ static const uint8_t hid_report_desc[] = {
 
         HID_USAGE_PAGE(HID_USAGE_GEN_LEDS),
             HID_COLLECTION(HID_COLLECTION_LOGICAL),
-                #if CONFIG_SHIELD_ROBOT_CONTROLLER_STANDALONE
-                    HID_USAGE(HID_USAGE_LED_PLAYER1),
-                    HID_USAGE(HID_USAGE_LED_PLAYER2),
-                    HID_USAGE(HID_USAGE_LED_PLAYER3),
-                    HID_USAGE(HID_USAGE_LED_PLAYER4),
-                    HID_USAGE(HID_USAGE_LED_LINUX_SLEEP),
-                    HID_USAGE(HID_USAGE_LED_LINUX_MUTE),
-                    HID_REPORT_SIZE(1),
-                    HID_REPORT_COUNT(CONTROLLER_LED_COUNT),
-                #elif CONFIG_SHIELD_ROBOT_CONTROLLER_EMBEDDED
-                    HID_USAGE(HID_USAGE_LED_LINUX_SLEEP),
-                    HID_USAGE(HID_USAGE_LED_LINUX_MUTE),
-                    HID_USAGE(HID_USAGE_LED_LINUX_MISC),
-                    HID_USAGE(HID_USAGE_LED_LINUX_MAIL),
-                    HID_REPORT_SIZE(1),
-                    HID_REPORT_COUNT(CONTROLLER_LED_COUNT),
-                #else
-                    #error "Invalid controller variant"
+                HID_USAGE(CONTROLLER_LED_1_USAGE),
+                HID_USAGE(CONTROLLER_LED_2_USAGE),
+                HID_USAGE(CONTROLLER_LED_3_USAGE),
+                HID_USAGE(CONTROLLER_LED_4_USAGE),
+                #if CONTROLLER_LED_COUNT >= 6
+                HID_USAGE(CONTROLLER_LED_5_USAGE),
+                HID_USAGE(CONTROLLER_LED_6_USAGE),
                 #endif
+                HID_REPORT_SIZE(1),
+                HID_REPORT_COUNT(CONTROLLER_LED_COUNT),
 	            HID_OUTPUT(HID_DATA|HID_VARIABLE|HID_ABSOLUTE),
             HID_END_COLLECTION,
             HID_REPORT_SIZE(1),
@@ -408,14 +393,12 @@ static int set_report_cb(const struct device *dev,
 static void set_idle_cb(const struct device *dev,
 			const uint8_t id, const uint32_t duration)
 {
-    LOG_INF("Set Idle %u to %u", id, duration);
     controller_set_idle(duration);
 }
 
 
 static uint32_t get_idle_cb(const struct device *dev, const uint8_t id)
 {
-    LOG_INF("Get Idle %u to %u", id, 0);
     return controller_get_idle();
 }
 
@@ -426,8 +409,14 @@ static void set_protocol_cb(const struct device *dev, const uint8_t proto)
 }
 
 
+
+#if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(4,0,99)
 static void input_report_done_cb(const struct device *dev, const uint8_t *const report)
+#else
+static void input_report_done_cb(const struct device *dev)
+#endif
 {
+    LOG_DBG("Input Report done");
     controller_input_report_done();
 }
 

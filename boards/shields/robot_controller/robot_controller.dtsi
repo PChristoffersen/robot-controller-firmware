@@ -123,47 +123,10 @@
         };
     };
 
-    analog_axis {
-        compatible = "analog-axis";
-        status = "okay";
-        poll-period-ms = <20>;
-
-        #define ANALOG_AXIS_COMMON(axis_deadzone) \
-            in-min = <0>; \
-            in-max = <4095>; \
-            out-min = <(-2048)>; \
-            out-max = <2047>;
-
-        axis_z {
-            io-channels = <&adc1 0>;
-            zephyr,axis = <INPUT_ABS_RZ>;
-            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE_Z)
-        };
-        axis_x {
-            io-channels = <&adc1 1>;
-            zephyr,axis = <INPUT_ABS_X>;
-            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
-        };
-        axis_y {
-            io-channels = <&adc1 2>;
-            zephyr,axis = <INPUT_ABS_Y>;
-            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
-        };
-        axis_rz {
-            io-channels = <&adc1 3>;
-            zephyr,axis = <INPUT_ABS_Z>;
-            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE_Z)
-        };
-        axis_rx {
-            io-channels = <&adc1 4>;
-            zephyr,axis = <INPUT_ABS_RX>;
-            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
-        };
-        axis_ry {
-            io-channels = <&adc1 5>;
-            zephyr,axis = <INPUT_ABS_RY>;
-            ANALOG_AXIS_COMMON(ANALOG_AXIS_DEADZONE)
-        };
+    zephyr,user {
+        // Analog Axis channels
+        io-channels = <&adc1 0>, <&adc1 1>, <&adc1 2>, <&adc1 3>, <&adc1 4>, <&adc1 5>;
+        zephyr,axis = <INPUT_ABS_X>, <INPUT_ABS_Y>, <INPUT_ABS_Z>, <INPUT_ABS_RX>, <INPUT_ABS_RY>, <INPUT_ABS_RZ>;
     };
 
     gpio_leds: gpio_leds {
@@ -299,6 +262,9 @@
     };
 };
 
+&rcc {
+    adc-prescaler = <8>;
+};
 
 &adc1 {
     status = "okay";
@@ -308,9 +274,6 @@
     #address-cells = <1>;
     #size-cells = <0>;
     
-    dmas = <&dma1 1 (STM32_DMA_PERIPH_TO_MEMORY | STM32_DMA_PERIPH_16BITS | STM32_DMA_MEM_16BITS)>;
-    dma-names = "adc0-dma1";
-
     #define ADC_CHANNEL_COMMON \
         zephyr,gain = "ADC_GAIN_1"; \
         zephyr,reference = "ADC_REF_INTERNAL"; \

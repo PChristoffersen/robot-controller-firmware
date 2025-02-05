@@ -5,9 +5,8 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      # v4.0.0 does not have support for adc dma on stm32f1x,
-      # it have been added on main, so for not just use main.
-      # Whan a release is available with the support, it should be used.
+      # We probably want to use a specific tag or branch here
+      # but the new USB stack does not seem very stable on v4.0.0
       #revision: v4.1.0
       revision: main
       clone-depth: 1
@@ -20,7 +19,7 @@ manifest:
           - hal_stm32
     - name: ws2812-stm32
       path: modules/ws2812-stm32
-      revision: v1.0
+      revision: v1.1
       url: https://github.com/PChristoffersen/zephyr-ws2812-stm32.git
   self:
     path: application

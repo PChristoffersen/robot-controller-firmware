@@ -42,11 +42,6 @@
 
 LOG_MODULE_REGISTER(usbd);
 
-static const char *const blocklist[] = {
-	"dfu_dfu",
-	NULL,
-};
-
 
 USBD_DEVICE_DEFINE(
     controller_usbd, 
@@ -116,7 +111,6 @@ static void usbd_msg_cb(struct usbd_context *const ctx, const struct usbd_msg *c
 		on_usb_reset(ctx);
 		break;
 	case USBD_MSG_CONFIGURATION:
-		LOG_INF("\tConfiguration value %d", msg->status);
 		on_usb_configuation(ctx, msg->status);
 		break;
 	case USBD_MSG_UDC_ERROR:
@@ -173,7 +167,11 @@ int controller_usb_device_init()
 	/* doc configuration register end */
 
 	/* doc functions register start */
-	err = usbd_register_all_classes(&controller_usbd, USBD_SPEED_FS, 1, blocklist);
+	#if ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(4,0,99)
+	err = usbd_register_all_classes(&controller_usbd, USBD_SPEED_FS, 1, NULL);
+	#else
+	err = usbd_register_all_classes(&controller_usbd, USBD_SPEED_FS, 1);
+	#endif
 	if (err) {
 		LOG_ERR("Failed to add register classes");
 		return err;
@@ -223,7 +221,7 @@ static int reset_usb_interface()
 {
 	uint32_t cause = 0;
 	hwinfo_get_reset_cause(&cause);
-	if (!(cause & RESET_POR)) {
+	if (cause & (RESET_SOFTWARE|RESET_WATCHDOG)) {
 		// Reset USB interface unless reset cause is power-on-reset
 		const struct device *gpio_port = DEVICE_DT_GET(DT_NODELABEL(USB_GPIO_PORT));
 		gpio_pin_configure(gpio_port, USB_GPIO_PIN_PD, GPIO_OUTPUT);

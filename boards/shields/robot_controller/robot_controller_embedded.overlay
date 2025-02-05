@@ -32,7 +32,11 @@
  #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include "robot_controller.dtsi"
 
-/ {
-
-
+&i2c_buttons {
+    sw3 {
+        zephyr,code = <INPUT_BTN_MODE>;
+    };
+    sw4 {
+        zephyr,code = <INPUT_BTN_START>;
+    };
 };

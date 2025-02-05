@@ -19,6 +19,7 @@ project(robot_controller)
 
 target_sources(app PRIVATE
     src/main.c
+    src/analog_axis.c
     src/hid_device.c
     src/usb_device.c
     src/lamp_array.c

@@ -32,6 +32,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <zephyr/input/input.h>
 
 #include "hid_gamepad.h"
@@ -61,16 +62,35 @@ static inline bool input_process_axis(struct input_event *evt, hid_gamepad_input
     size_t idx;
     axis_value_t diff;
 
+    idx = evt->code - INPUT_ABS_X;
+    if (idx>CONTROLLER_AXIS_COUNT) {
+        LOG_ERR("Invalid axis index: %d", idx);
+        return false;
+    }
+
     switch (evt->code) {
-        case INPUT_ABS_X...INPUT_ABS_RZ:
-            idx = evt->code - INPUT_ABS_X;
-            if (idx>CONTROLLER_AXIS_COUNT) {
-                LOG_ERR("Invalid axis index: %d", idx);
-                return false;
-            }
-            diff = input_state->axis[idx] - evt->value;
+        case INPUT_ABS_X:
+        case INPUT_ABS_Y:
+        case INPUT_ABS_RX:
+        case INPUT_ABS_RY:
+            diff = abs(input_state->axis[idx] - evt->value);
             input_state->axis[idx] = evt->value;
-            return diff > CONTROLLER_AXIS_CHANGE_THRESHOLD || diff < -CONTROLLER_AXIS_CHANGE_THRESHOLD;
+            if (evt->value > -CONTROLLER_AXIS_DEADZONE && evt->value < CONTROLLER_AXIS_DEADZONE) {
+                 return diff > CONTROLLER_AXIS_CHANGE_THRESHOLD;
+            }
+            else {
+                return diff != 0;
+            }
+        case INPUT_ABS_Z:
+        case INPUT_ABS_RZ:
+            diff = abs(input_state->axis[idx] - evt->value);
+            input_state->axis[idx] = evt->value;
+            if (evt->value > -CONTROLLER_AXIS_DEADZONE && evt->value < CONTROLLER_AXIS_DEADZONE) {
+                return diff > CONTROLLER_AXIS_CHANGE_THRESHOLD;
+            }
+            else {
+                return diff != 0;
+            }
         default:
             break;
     }
@@ -126,6 +146,13 @@ static inline bool input_process_key(struct input_event *evt, hid_gamepad_input_
         case INPUT_BTN_4:
             input_state->buttons.extra4 = evt->value;
             return true;
+        case INPUT_BTN_MODE:
+            input_state->buttons.extra3 = evt->value;
+            return true;
+        case INPUT_BTN_START:
+            input_state->buttons.extra4 = evt->value;
+            return true;
+            
 
         // Ext 
         case INPUT_BTN_5:

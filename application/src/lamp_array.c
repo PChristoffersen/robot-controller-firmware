@@ -51,9 +51,9 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
     /* WS2812 LEDS */
     {
         .lamp_id = 0,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = CONTROLLER_LED_STRIP_X_OFFSET_MM * UM_PER_MM,
+        .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
@@ -65,9 +65,9 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
     },
     {
         .lamp_id = 1,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = (1*CONTROLLER_LED_STRIP_DISTANCE_MM+CONTROLLER_LED_STRIP_X_OFFSET_MM) * UM_PER_MM,
+        .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
@@ -79,9 +79,9 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
     },
     {
         .lamp_id = 2,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = (2*CONTROLLER_LED_STRIP_DISTANCE_MM+CONTROLLER_LED_STRIP_X_OFFSET_MM) * UM_PER_MM,
+        .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
@@ -93,9 +93,9 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
     },
     {
         .lamp_id = 3,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = (3*CONTROLLER_LED_STRIP_DISTANCE_MM+CONTROLLER_LED_STRIP_X_OFFSET_MM) * UM_PER_MM,
+        .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
@@ -106,13 +106,12 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .input_binding = 0,
     },
 
-    #if CONFIG_SHIELD_ROBOT_CONTROLLER_STANDALONE
     /* Illuminated Buttons */
     {
         .lamp_id = 4,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = CONTROLLER_LED_BUTTON_1_X_OFFSET_MM * UM_PER_MM,
+        .position_y = CONTROLLER_LED_BUTTON_1_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_BUTTON_1_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_CONTROL,
         .red_level_count = 0x00,
@@ -120,13 +119,13 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .blue_level_count = 0x00,
         .intensity_level_count = 100,
         .is_programmable = 1,
-        .input_binding = HID_USAGE_EXTRA_BUTTON_1,
+        .input_binding = CONTROLLER_BUTTON_1_USAGE,
     },
     {
         .lamp_id = 5,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = CONTROLLER_LED_BUTTON_2_X_OFFSET_MM * UM_PER_MM,
+        .position_y = CONTROLLER_LED_BUTTON_2_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_BUTTON_2_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_CONTROL,
         .red_level_count = 0x00,
@@ -134,13 +133,13 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .blue_level_count = 0x00,
         .intensity_level_count = 100,
         .is_programmable = 1,
-        .input_binding = HID_USAGE_EXTRA_BUTTON_2,
+        .input_binding = CONTROLLER_BUTTON_2_USAGE,
     },
     {
         .lamp_id = 6,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = CONTROLLER_LED_BUTTON_3_X_OFFSET_MM * UM_PER_MM,
+        .position_y = CONTROLLER_LED_BUTTON_3_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_BUTTON_3_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_CONTROL,
         .red_level_count = 0x00,
@@ -148,13 +147,13 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .blue_level_count = 0x00,
         .intensity_level_count = 100,
         .is_programmable = 1,
-        .input_binding = HID_USAGE_EXTRA_BUTTON_3,
+        .input_binding = CONTROLLER_BUTTON_3_USAGE,
     },
     {
         .lamp_id = 7,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = CONTROLLER_LED_BUTTON_4_X_OFFSET_MM * UM_PER_MM,
+        .position_y = CONTROLLER_LED_BUTTON_4_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_BUTTON_4_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_CONTROL,
         .red_level_count = 0x00,
@@ -162,14 +161,15 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .blue_level_count = 0x00,
         .intensity_level_count = 100,
         .is_programmable = 1,
-        .input_binding = HID_USAGE_EXTRA_BUTTON_4,
+        .input_binding = CONTROLLER_BUTTON_4_USAGE,
     },
+    #if CONFIG_SHIELD_ROBOT_CONTROLLER_STANDALONE
     /* Indicator buttons */
     {
         .lamp_id = 8,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = CONTROLLER_LED_INDICATOR_1_X_OFFSET_MM * UM_PER_MM,
+        .position_y = CONTROLLER_LED_INDICATOR_1_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_INDICATOR_1_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0x01,
@@ -181,9 +181,9 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
     },
     {
         .lamp_id = 9,
-        .position_x = 0,
-        .position_y = 0,
-        .position_z = 0,
+        .position_x = CONTROLLER_LED_INDICATOR_2_X_OFFSET_MM * UM_PER_MM,
+        .position_y = CONTROLLER_LED_INDICATOR_2_Y_OFFSET_MM * UM_PER_MM,
+        .position_z = CONTROLLER_LED_INDICATOR_2_Z_OFFSET_MM * UM_PER_MM,
         .update_latency = 0,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0x01,
@@ -201,9 +201,9 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
 
 static const hid_lamp_array_attributes_report_t lamp_array_attributes = {
     .lamp_count = LAMP_COUNT,
-    .width  = 1000,
-    .height = 1000,
-    .depth  = 1000,
+    .width  = CONTROLLER_WIDTH_MM * UM_PER_MM,
+    .height = CONTROLLER_HEIGHT_MM * UM_PER_MM,
+    .depth  = CONTROLLER_DEPTH_MM * UM_PER_MM,
     .kind = LAMP_ARRAY_KIND_GAME_CONTROLLER,
     .min_update_interval = 5 * USEC_PER_MSEC, // 5 ms
 };
@@ -268,7 +268,7 @@ int lamp_attributes_request(const uint8_t *buffer, uint16_t bufsize)
         return -EINVAL;
     }
 
-    LOG_INF("Lamp Attributes Request: lamp_id=%u", request->lamp_id);
+    LOG_DBG("Lamp Attributes Request: lamp_id=%u", request->lamp_id);
     current_lamp_id = request->lamp_id;
 
     return 0;
@@ -281,7 +281,7 @@ int lamp_attributes_response(uint8_t *buffer, uint16_t bufsize)
         return -EINVAL;
     }
 
-    LOG_INF("Lamp Attributes Response: lamp_id=%u", current_lamp_id);
+    LOG_DBG("Lamp Attributes Response: lamp_id=%u", current_lamp_id);
     memcpy(buffer, &lamp_attributes[current_lamp_id], sizeof(hid_lamp_attributes_response_t));
 
     if (current_lamp_id < LAMP_COUNT-1) {
