@@ -54,7 +54,7 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .position_x = CONTROLLER_LED_STRIP_X_OFFSET_MM * UM_PER_MM,
         .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
         .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
-        .update_latency = 0,
+        .update_latency = 170,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
         .green_level_count = 0xFF,
@@ -68,7 +68,7 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .position_x = (1*CONTROLLER_LED_STRIP_DISTANCE_MM+CONTROLLER_LED_STRIP_X_OFFSET_MM) * UM_PER_MM,
         .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
         .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
-        .update_latency = 0,
+        .update_latency = 170,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
         .green_level_count = 0xFF,
@@ -82,7 +82,7 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .position_x = (2*CONTROLLER_LED_STRIP_DISTANCE_MM+CONTROLLER_LED_STRIP_X_OFFSET_MM) * UM_PER_MM,
         .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
         .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
-        .update_latency = 0,
+        .update_latency = 170,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
         .green_level_count = 0xFF,
@@ -96,7 +96,7 @@ static const hid_lamp_attributes_response_t lamp_attributes[] = {
         .position_x = (3*CONTROLLER_LED_STRIP_DISTANCE_MM+CONTROLLER_LED_STRIP_X_OFFSET_MM) * UM_PER_MM,
         .position_y = CONTROLLER_LED_STRIP_Y_OFFSET_MM * UM_PER_MM,
         .position_z = CONTROLLER_LED_STRIP_Z_OFFSET_MM * UM_PER_MM,
-        .update_latency = 0,
+        .update_latency = 170,
         .purpose = LAMP_PURPOSE_STATUS,
         .red_level_count = 0xFF,
         .green_level_count = 0xFF,
@@ -205,7 +205,7 @@ static const hid_lamp_array_attributes_report_t lamp_array_attributes = {
     .height = CONTROLLER_HEIGHT_MM * UM_PER_MM,
     .depth  = CONTROLLER_DEPTH_MM * UM_PER_MM,
     .kind = LAMP_ARRAY_KIND_GAME_CONTROLLER,
-    .min_update_interval = 5 * USEC_PER_MSEC, // 5 ms
+    .min_update_interval = 4 * USEC_PER_MSEC, // 4 ms
 };
 
 
@@ -259,12 +259,14 @@ int lamp_array_attributes_response(uint8_t *buffer, uint16_t bufsize)
 int lamp_attributes_request(const uint8_t *buffer, uint16_t bufsize)
 {
     if (bufsize < sizeof(hid_lamp_attributes_request_t)) {
+        LOG_ERR("Buffer too small %u", bufsize);
         return -EINVAL;
     }
 
     const hid_lamp_attributes_request_t *request = (const hid_lamp_attributes_request_t *)buffer;
 
     if (request->lamp_id >= LAMP_COUNT) {
+        LOG_ERR("Invalid lamp_id %u", request->lamp_id);
         return -EINVAL;
     }
 
@@ -278,6 +280,7 @@ int lamp_attributes_request(const uint8_t *buffer, uint16_t bufsize)
 int lamp_attributes_response(uint8_t *buffer, uint16_t bufsize)
 {
     if (bufsize < sizeof(hid_lamp_attributes_response_t)) {
+        LOG_ERR("Buffer too small %u", bufsize);
         return -EINVAL;
     }
 
@@ -298,6 +301,7 @@ int lamp_attributes_response(uint8_t *buffer, uint16_t bufsize)
 int lamp_multi_update(const uint8_t *buffer, uint16_t bufsize)
 {
     if (bufsize < sizeof(hid_lamp_multi_update_t)) {
+        LOG_ERR("Buffer too small %u", bufsize);
         return -EINVAL;
     }
     if (controller_is_autonomous_mode()) {
@@ -315,13 +319,14 @@ int lamp_multi_update(const uint8_t *buffer, uint16_t bufsize)
         led_strip_update();
     }
 
-    return -ENOTSUP;
+    return 0;
 }
 
 
 int lamp_range_update(const uint8_t *buffer, uint16_t bufsize)
 {
     if (bufsize < sizeof(hid_lamp_range_update_t)) {
+        LOG_ERR("Buffer too small %u", bufsize);
         return -EINVAL;
     }
     if (controller_is_autonomous_mode()) {
@@ -339,7 +344,7 @@ int lamp_range_update(const uint8_t *buffer, uint16_t bufsize)
         led_strip_update();
     }
 
-    return -ENOTSUP;
+    return 0;
 }
 
 

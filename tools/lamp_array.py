@@ -206,7 +206,7 @@ class LampArray:
     def __init__(self, vendor_id, product_id, control_on_open=True, release_on_close=True):
         self._vendor_id = vendor_id
         self._product_id = product_id
-        self._device = hid.device()
+        self._device = None
         self._control_on_open = control_on_open
         self._release_on_close = release_on_close
         self._attributes: LampArrayAttributes = None
@@ -315,7 +315,7 @@ class LampArray:
         """
         Open the HID device
         """
-        self._device.open(self._vendor_id, self._product_id)
+        self._device = hid.Device(self._vendor_id, self._product_id)
 
         report = self._device.get_feature_report(LampArray.REPORT_ID_LIGHTING_LAMP_ARRAY_ATTRIBUTES, 64)
         self._attributes = LampArrayAttributes.from_buffer_copy(bytes(report[1:]))

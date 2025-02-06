@@ -359,6 +359,7 @@ static int set_report_cb(const struct device *dev,
 {
     // Report ID is the first byte
     if (len < 1 || buf[0] != id) {
+        LOG_ERR("Invalid Report ID: %d", len<1?-1:buf[0]);
         return -EINVAL;
     }
 

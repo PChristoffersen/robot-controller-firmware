@@ -139,19 +139,19 @@
         status = "okay";
 
         led1 {
-            pwms = <&pwm4 2 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            pwms = <&pwm4 2 PWM_MSEC(1) PWM_POLARITY_INVERTED>;
             label = "LED1";
         };
         led2 {
-            pwms = <&pwm4 1 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            pwms = <&pwm4 1 PWM_MSEC(1) PWM_POLARITY_INVERTED>;
             label = "LED2";
         };
         led3 {
-            pwms = <&pwm3 3 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            pwms = <&pwm3 3 PWM_MSEC(1) PWM_POLARITY_INVERTED>;
             label = "LED3";
         };
         led4 {
-            pwms = <&pwm3 4 PWM_MSEC(2) PWM_POLARITY_INVERTED>;
+            pwms = <&pwm3 4 PWM_MSEC(1) PWM_POLARITY_INVERTED>;
             label = "LED4";
         };
     };

@@ -130,8 +130,12 @@ void controller_set_suspend(bool suspended)
                 controller_set_idle(0);
                 led_strip_clear();
                 lamp_array_reset();
+                update_leds(0x00);
             }
             else {
+                if (g_autonomous) {
+                    update_leds(g_led_state);
+                }
                 start_report_timer();
                 g_input_state_changed = true;
             }
@@ -155,7 +159,7 @@ int controller_set_output(const uint8_t *buffer, uint16_t bufsize)
     k_mutex_lock(&g_input_mutex, K_FOREVER);
     if (g_led_state != output->leds) {
         g_led_state = output->leds;
-        if (g_autonomous) {
+        if (g_autonomous && !g_suspended) {
             update_leds(g_led_state);
         }
     }

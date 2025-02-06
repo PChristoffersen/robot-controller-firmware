@@ -41,57 +41,29 @@ def main():
     # Using with statement
     with LampArray(vendor_id=DEVICE_VID, product_id=DEVICE_PID) as lamps:
         device = lamps.device
-        print("Manufacturer: %s" % device.get_manufacturer_string())
-        print("Product: %s" % device.get_product_string())
-        print("Serial No: %s" % device.get_serial_number_string())
+        print("Manufacturer: %s" % device.manufacturer)
+        print("Product: %s" % device.product)
+        print("Serial No: %s" % device.serial)
         print("Min update interval: %.3fs" % lamps.min_update_interval)
         print("Number of lamps: %d" % lamps.n_lamps)
         print("")
 
-        print("Range update")
-        lamps.fill_range(0, lamps.n_lamps/2, (255, 0, 0))
-        lamps.fill_range(lamps.n_lamps/2, lamps.n_lamps/2, (0, 0, 255), show=True)
-        
-        sleep(2)
+        if lamps.n_lamps < 10:
+            print("No AUX lamps")
+            return
 
-        print("Fill all")
-        lamps.fill((0, 255, 0), show=True)
-
-        sleep(2)
-
-        print("Fill all deferred")
-        lamps.fill((64, 0, 64))
-        lamps.show()
-
-        sleep(2)
-
-        print("Clear all")
-        lamps.clear(show=True)
-
-        sleep(2)
-
-        print("Single update")
-        lamps[0] = (255, 0, 0)
-        lamps[1] = (0, 255, 0)
-        lamps[2] = (0, 0, 255)
-        lamps[3] = (0, 128, 128)
-        lamps.show()
-
-        sleep(2)
-
-        print("Fade luminance")
-        for i in range(0, 256, 16):
-            pass
-
-        print("Chase")
+        print("Blink AUX lamps")
         while True:
-            for color in [(255, 0, 0, 50), (0, 255, 0, 20), (0, 0, 255, 100)]:
-                for i in range(0, lamps.n_lamps):
-                    lamps[i] = color
-                    lamps[(i+lamps.n_lamps-1) % lamps.n_lamps] = (0, 0, 0, 0)
-                    lamps.show()
-                    sleep(max(0.1, lamps.min_update_interval))
-
+            lamps[8] = (0, 0, 0, 1)
+            lamps[9] = (0, 0, 0, 0)
+            lamps.show()
+            sleep(0.2)
+            lamps[8] = (0, 0, 0, 0)
+            lamps[9] = (0, 0, 0, 1)
+            lamps.show()
+            sleep(0.2)
+                
+        
 
 
 
